@@ -1,0 +1,27 @@
+package com.parvnigam.careerbridge;
+import jakarta.validation.constraints.*;
+import java.time.*;
+import java.util.*;
+public final class Inputs {
+    public record Login(@Email @NotBlank @Size(max=254) String email,@NotBlank @Size(max=72) String password) {}
+    public record Register(@NotBlank @Size(max=80) String name,@Email @NotBlank @Size(max=254) String email,
+        @NotBlank @Size(min=10,max=72) String password,@NotNull Model.Role role,Long universityId,@Size(max=100) String department,@Min(1960) @Max(2100) Integer graduationYear) {}
+    public record Profile(@Size(max=140) String headline,@Size(max=4000) String about,@Size(max=150) String city,
+        @DecimalMin("0.0") @DecimalMax("10.0") Double cgpa,@DecimalMin("0.0") Double experienceYears,
+        @Size(max=140) String preferredRole,@Size(max=39) String githubUsername,@Size(max=50) String leetcodeUsername,boolean visibleToRecruiters,
+        @Size(max=40) List<@Size(max=60) String> skills) {}
+    public record Job(@NotBlank @Size(max=140) String title,@NotBlank @Size(max=12000) String description,
+        @NotBlank @Size(max=150) String location,@NotBlank String employmentType,@NotBlank String workMode,
+        @Min(0) Integer salaryMin,@Min(0) Integer salaryMax,@Min(1) Integer openings,
+        @DecimalMin("0.0") @DecimalMax("10.0") Double minCgpa,@DecimalMin("0.0") Double minExperience,
+        @FutureOrPresent LocalDate deadline,Long universityId,@NotNull @Size(min=1,max=40) List<@NotBlank @Size(max=60) String> requiredSkills) {}
+    public record Project(@NotBlank @Size(max=140) String title,@Size(max=4000) String description,
+        @Size(max=200) String stack,@Size(max=2048) String repositoryUrl,@Size(max=2048) String liveUrl) {}
+    public record Education(@NotBlank @Size(max=200) String institution,@NotBlank @Size(max=140) String qualification,@Min(1960) @Max(2100) Integer passingYear,@Size(max=60) String grade) {}
+    public record Experience(@NotBlank @Size(max=140) String company,@NotBlank @Size(max=140) String title,@Size(max=140) String duration,@Size(max=4000) String description) {}
+    public record Apply(@NotNull Long jobId,@Size(max=4000) String coverLetter) {}
+    public record Stage(@NotNull Model.Stage status,@Size(max=2000) String note) {}
+    public record Interview(@NotNull @Future Instant scheduledAt,@Min(15) @Max(180) int durationMinutes,@Size(max=2048) String meetingUrl,@Size(max=2000) String instructions) {}
+    public record Company(@NotBlank @Size(max=140) String name,@Size(max=2048) String website,@Size(max=150) String location,@Size(max=4000) String description) {}
+    public record Mock(@NotBlank @Size(max=150) String targetRole,@NotBlank @Size(max=150) String skill) {}
+}
