@@ -37,12 +37,12 @@ public class SecurityConfig {
         converter.setJwtGrantedAuthoritiesConverter(jwt -> {
             Model.Account account=accounts.findById(Long.valueOf(jwt.getSubject())).orElse(null);
             Number session=jwt.getClaim("sessionVersion");
-            if(account==null || !account.enabled || session==null || session.intValue()!=account.authVersion) return List.of();
+            if(account==null || !account.enabled || Boolean.FALSE.equals(account.emailVerified) || session==null || session.intValue()!=account.authVersion) return List.of();
             return List.of(new SimpleGrantedAuthority("ROLE_"+account.role));
         });
         return http.csrf(csrf->csrf.disable()).cors(cors->{})
             .sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(a->a.requestMatchers("/api/auth/login","/api/auth/register","/api/public/**","/actuator/health","/error").permitAll()
+            .authorizeHttpRequests(a->a.requestMatchers("/api/auth/login","/api/auth/register","/api/auth/verify-email","/api/auth/resend-verification","/api/public/**","/actuator/health","/error").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/placement/**").hasAnyRole("PLACEMENT_OFFICER","ADMIN")
                 .requestMatchers("/api/recruiter/**").hasRole("RECRUITER")

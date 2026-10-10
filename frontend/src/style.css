@@ -55,3 +55,5 @@
 .eligibility-requirements-compact{display:flex;gap:8px 18px;flex-wrap:wrap;margin-top:15px;font-size:11px;color:#738365;overflow-wrap:anywhere}
 .eligibility-compact{margin:12px 0}.eligibility-compact summary{font-size:11px;cursor:pointer;margin-top:10px}
 @media(max-width:480px){.eligibility-requirements dl{grid-template-columns:1fr}.eligibility-report,.eligibility-requirements{padding:15px}.eligibility-checks li>div{flex-wrap:wrap}.eligibility-fields{grid-column:auto}}
+
+.verification-page{max-width:760px;margin:0 auto;padding:32px 20px}.verification-page>main{margin-top:32px}.verification-page h1{font-size:clamp(26px,5vw,38px)}.verification-page form{margin-top:28px}.verification-page p{overflow-wrap:anywhere}

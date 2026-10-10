@@ -11,9 +11,10 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
-@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT,properties={"spring.datasource.url=jdbc:h2:mem:workflows;MODE=PostgreSQL;DB_CLOSE_DELAY=-1","spring.jpa.hibernate.ddl-auto=create-drop","app.upload-dir=target/test-resumes","app.mail-enabled=false","app.ai-url=","app.redis-enabled=false"})
+@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT,properties={"spring.datasource.url=jdbc:h2:mem:workflows;MODE=PostgreSQL;DB_CLOSE_DELAY=-1","spring.jpa.hibernate.ddl-auto=create-drop","app.upload-dir=target/test-resumes","app.mail-enabled=false","app.local-email-testing=true","app.local-inbox-port=0","app.ai-url=","app.redis-enabled=false"})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class WorkflowTests {
+    @org.springframework.beans.factory.annotation.Autowired VerificationMail mail;
     @LocalServerPort int port;
     final HttpClient http=HttpClient.newHttpClient();final JsonMapper json=JsonMapper.builder().build();
     HttpResponse<String> request(String method,String path,String token,Object body)throws Exception{var b=HttpRequest.newBuilder(URI.create("http://127.0.0.1:"+port+"/api"+path)).timeout(Duration.ofSeconds(15));if(token!=null)b.header("Authorization","Bearer "+token);if(body!=null)b.header("Content-Type","application/json");return http.send(b.method(method,body==null?HttpRequest.BodyPublishers.noBody():HttpRequest.BodyPublishers.ofString(json.writeValueAsString(body))).build(),HttpResponse.BodyHandlers.ofString());}
@@ -30,7 +31,7 @@ class WorkflowTests {
     }
     @Test @Order(2) void signupCreatesProfileWithoutLeakingPassword()throws Exception{
         var schools=tree(request("GET","/public/universities",null,null));var result=request("POST","/auth/register",null,Map.of("name","New Student","email","new-student@example.com","password","Strong@12345","role","STUDENT","universityId",schools.get(0).get("id").asLong(),"graduationYear",2028));
-        assertEquals(201,result.statusCode(),result.body());assertFalse(result.body().contains("passwordHash"));String token=tree(result).get("token").asText();assertEquals(200,request("GET","/student/profile",token,null).statusCode());
+        assertEquals(201,result.statusCode(),result.body());assertFalse(result.body().contains("passwordHash"));assertFalse(tree(result).has("token"));String link=mail.messages.get(mail.messages.size()-1).link();assertEquals(200,request("POST","/auth/verify-email",null,Map.of("token",link.substring(link.indexOf("#token=")+7))).statusCode());String token=tree(request("POST","/auth/login",null,Map.of("email","new-student@example.com","password","Strong@12345"))).get("token").asText();assertEquals(200,request("GET","/student/profile",token,null).statusCode());
     }
     @Test @Order(3) void recruiterCreatesOpeningAndOwnershipIsEnforced()throws Exception{
         var created=request("POST","/recruiter/jobs",recruiter(),jobInput(null));assertEquals(201,created.statusCode(),created.body());createdJob=tree(created).get("id").asLong();

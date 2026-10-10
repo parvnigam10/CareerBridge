@@ -24,10 +24,10 @@ public class Platform {
         if(jwt==null) throw fail(401,"Please sign in");
         Model.Account a=r.accounts().findById(Long.valueOf(jwt.getSubject())).orElseThrow(()->fail(401,"Account not found"));
         Number session=jwt.getClaim("sessionVersion");
-        if(!a.enabled || session==null || session.intValue()!=a.authVersion) throw fail(401,"Your session is no longer active");
+        if(!a.enabled || Boolean.FALSE.equals(a.emailVerified) || session==null || session.intValue()!=a.authVersion) throw fail(401,"Your session is no longer active");
         return a;
     }
-    Map<String,Object> user(Model.Account a) {return map("id",a.id,"name",a.name,"email",a.email,"role",a.role,"enabled",a.enabled,"universityId",a.universityId,"department",a.department,"graduationYear",a.graduationYear);}
+    Map<String,Object> user(Model.Account a) {return map("id",a.id,"name",a.name,"email",a.email,"role",a.role,"enabled",a.enabled,"emailVerified",Boolean.TRUE.equals(a.emailVerified),"emailVerificationStatus",a.emailVerified==null?"EXISTING_ACCOUNT":a.emailVerified?"VERIFIED":"PENDING","universityId",a.universityId,"department",a.department,"graduationYear",a.graduationYear);}
     Model.Profile profile(Long uid) {return r.profiles().findByUserId(uid).orElseThrow(()->fail(404,"Student profile not found"));}
     Model.Job job(Long id) {return r.jobs().findById(id).orElseThrow(()->fail(404,"Job not found"));}
     Model.Job ownJob(Model.Account a,Long id) {Model.Job j=job(id);if(!j.recruiterId.equals(a.id))throw fail(403,"This opening belongs to another recruiter");return j;}
@@ -145,11 +145,11 @@ public class Platform {
     List<Map<String,Object>> recruiterApps(Model.Account recruiter) {return r.jobs().findByRecruiterIdOrderByCreatedAtDesc(recruiter.id).stream().flatMap(j->r.applications().findByJobIdOrderByCreatedAtDesc(j.id).stream()).sorted(Comparator.comparing((Model.Application a)->a.createdAt).reversed()).map(a->applicationView(a,recruiter)).toList();}
     List<Map<String,Object>> candidates(Model.Account recruiter,String q,Long jobId) {
         Model.Job j=jobId==null?null:ownJob(recruiter,jobId);
-        return r.accounts().findAll().stream().filter(a->a.role==Model.Role.STUDENT&&a.enabled).filter(a->j==null||canSee(a,j)).filter(a->profile(a.id).visibleToRecruiters)
+        return r.accounts().findAll().stream().filter(a->a.role==Model.Role.STUDENT&&a.enabled&&!Boolean.FALSE.equals(a.emailVerified)).filter(a->j==null||canSee(a,j)).filter(a->profile(a.id).visibleToRecruiters)
             .filter(a->(a.name+" "+String.join(" ",profile(a.id).skills)).toLowerCase().contains(clean(q).toLowerCase()))
             .map(a->{Map<String,Object> v=map("user",map("id",a.id,"name",a.name,"department",a.department,"graduationYear",a.graduationYear),"profile",profile(a.id),"projects",r.projects().findByUserIdOrderByCreatedAtDesc(a.id));if(j!=null)v.put("match",match(a,profile(a.id),j));return v;}).toList();
     }
-    List<Model.Account> scopedStudents(Model.Account actor,Integer year,String department) {return r.accounts().findAll().stream().filter(a->a.role==Model.Role.STUDENT&&a.enabled)
+    List<Model.Account> scopedStudents(Model.Account actor,Integer year,String department) {return r.accounts().findAll().stream().filter(a->a.role==Model.Role.STUDENT&&a.enabled&&!Boolean.FALSE.equals(a.emailVerified))
         .filter(a->actor.role==Model.Role.ADMIN||Objects.equals(actor.universityId,a.universityId)).filter(a->year==null||Objects.equals(year,a.graduationYear))
         .filter(a->clean(department).isEmpty()||clean(a.department).equalsIgnoreCase(department)).toList();}
     Map<String,Object> placement(Model.Account actor,Integer year,String department) {
