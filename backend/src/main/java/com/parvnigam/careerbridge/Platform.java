@@ -35,7 +35,7 @@ public class Platform {
     boolean active(Model.Job j) {return j.status.equals("ACTIVE") && (j.deadline==null || !j.deadline.isBefore(LocalDate.now()));}
     void audit(Model.Account a,String action,String target,String detail) {Model.Audit x=new Model.Audit();x.actorId=a.id;x.action=action;x.target=target;x.detail=detail;r.audits().save(x);}
     void event(Model.Application a,Model.Account actor,String note) {Model.ApplicationEvent e=new Model.ApplicationEvent();e.applicationId=a.id;e.actorId=actor.id;e.status=a.status.name();e.note=clean(note);r.events().save(e);}
-    Map<String,Object> match(Model.Profile p,Model.Job j) {
+    Map<String,Object> match(Model.Account student,Model.Profile p,Model.Job j) {
         Set<String> have=p.skills.stream().map(x->x.toLowerCase(Locale.ROOT)).collect(Collectors.toSet());
         List<String> matched=j.requiredSkills.stream().filter(x->have.contains(x.toLowerCase(Locale.ROOT))).toList();
         List<String> missing=j.requiredSkills.stream().filter(x->!have.contains(x.toLowerCase(Locale.ROOT))).toList();
@@ -44,17 +44,17 @@ public class Platform {
         double academics=cgpa>=j.minCgpa?1:Math.max(0,cgpa/Math.max(j.minCgpa,1));
         double experience=p.experienceYears>=j.minExperience?1:p.experienceYears/Math.max(j.minExperience,1);
         double location=j.workMode.equals("REMOTE")?1:clean(p.city).equalsIgnoreCase(clean(j.location))?1:0.4;
-        boolean eligible=cgpa>=j.minCgpa && p.experienceYears>=j.minExperience;
+        Eligibility.Report eligibility=Eligibility.assess(student,p,j);
         double score=Math.round((skill*.7+academics*.15+experience*.1+location*.05)*1000)/10.0;
-        return map("score",score,"matchedSkills",matched,"missingSkills",missing,"eligible",eligible,
+        return map("score",score,"matchedSkills",matched,"missingSkills",missing,"eligible",eligibility.eligible(),"eligibility",eligibility,
             "breakdown",map("skills",Math.round(skill*100),"academics",Math.round(academics*100),"experience",Math.round(experience*100),"location",Math.round(location*100)),
             "method","Weighted profile compatibility; not a hiring probability");
     }
     Map<String,Object> jobView(Model.Job j,Model.Account a) {
         Map<String,Object> v=map("id",j.id,"title",j.title,"companyName",j.companyName,"description",j.description,"location",j.location,"employmentType",j.employmentType,"workMode",j.workMode,
             "salaryMin",j.salaryMin,"salaryMax",j.salaryMax,"openings",j.openings,"minCgpa",j.minCgpa,"minExperience",j.minExperience,"deadline",j.deadline,"status",active(j)?j.status:j.status.equals("ACTIVE")?"EXPIRED":j.status,
-            "universityId",j.universityId,"requiredSkills",j.requiredSkills,"createdAt",j.createdAt);
-        if(a!=null && a.role==Model.Role.STUDENT) {v.put("match",match(profile(a.id),j));v.put("saved",r.saves().findByStudentIdAndJobId(a.id,j.id).isPresent());v.put("applied",r.applications().findByStudentIdAndJobId(a.id,j.id).isPresent());}
+            "minTenthPercentage",j.minTenthPercentage,"minSecondaryPercentage",j.minSecondaryPercentage,"maxActiveBacklogs",j.maxActiveBacklogs,"allowedBranches",j.allowedBranches.stream().sorted(String.CASE_INSENSITIVE_ORDER).toList(),"allowedGraduationYears",j.allowedGraduationYears.stream().sorted().toList(),"universityId",j.universityId,"requiredSkills",j.requiredSkills,"createdAt",j.createdAt);
+        if(a!=null && a.role==Model.Role.STUDENT) {v.put("match",match(a,profile(a.id),j));v.put("saved",r.saves().findByStudentIdAndJobId(a.id,j.id).isPresent());v.put("applied",r.applications().findByStudentIdAndJobId(a.id,j.id).isPresent());}
         if(a!=null && a.role==Model.Role.RECRUITER && a.id.equals(j.recruiterId))v.put("applicantCount",r.applications().findByJobIdOrderByCreatedAtDesc(j.id).size());
         return v;
     }
@@ -116,16 +116,20 @@ public class Platform {
         if(d.universityId()!=null && !r.universities().existsById(d.universityId()))throw fail(400,"University not found");
         Model.Job j=id==null?new Model.Job():ownJob(a,id);j.recruiterId=a.id;j.companyName=c.name;j.title=d.title().trim();j.description=d.description().trim();j.location=d.location().trim();j.employmentType=d.employmentType();j.workMode=d.workMode();
         j.salaryMin=d.salaryMin()==null?0:d.salaryMin();j.salaryMax=d.salaryMax()==null?0:d.salaryMax();j.openings=d.openings()==null?1:d.openings();j.minCgpa=d.minCgpa()==null?0:d.minCgpa();j.minExperience=d.minExperience()==null?0:d.minExperience();j.deadline=d.deadline();j.universityId=d.universityId();j.requiredSkills=new ArrayList<>(skills(d.requiredSkills()));
+        j.minTenthPercentage=d.minTenthPercentage();j.minSecondaryPercentage=d.minSecondaryPercentage();j.maxActiveBacklogs=d.maxActiveBacklogs();
+        j.allowedBranches=new LinkedHashSet<>();
+        if(d.allowedBranches()!=null){Set<String> seen=new HashSet<>();for(String branch:d.allowedBranches()){String normalized=Eligibility.normalizeBranch(branch);if(seen.add(normalized))j.allowedBranches.add(clean(branch).replaceAll("\\s+"," "));}}
+        j.allowedGraduationYears=d.allowedGraduationYears()==null?new LinkedHashSet<>():new LinkedHashSet<>(d.allowedGraduationYears());
         r.jobs().save(j);audit(a,id==null?"JOB_CREATED":"JOB_UPDATED",j.id.toString(),j.title);return j;
     }
     Map<String,Object> applicationView(Model.Application a,Model.Account viewer) {
         Model.Job j=job(a.jobId);Model.Account student=r.accounts().findById(a.studentId).orElseThrow();
         Map<String,Object> v=map("id",a.id,"job",jobView(j,null),"student",user(student),"status",a.status,"coverLetter",a.coverLetter,"createdAt",a.createdAt,"matchScore",a.matchScore,"resumeId",a.resumeId,"history",r.events().findByApplicationIdOrderByCreatedAtAsc(a.id));
-        if(viewer.role!=Model.Role.STUDENT)v.put("profile",fullProfile(student));return v;
+        v.put("eligibility",Eligibility.assess(student,profile(student.id),j));if(viewer.role!=Model.Role.STUDENT)v.put("profile",fullProfile(student));return v;
     }
     Model.Application apply(Model.Account a,Inputs.Apply d) {
         Model.Job j=job(d.jobId());if(!active(j))throw fail(400,"This opening is closed");if(!canSee(a,j))throw fail(403,"This opening is for another university");
-        Model.Profile p=profile(a.id);Map<String,Object> m=match(p,j);if(!(boolean)m.get("eligible"))throw fail(400,"You do not meet the CGPA or experience eligibility requirements");
+        Model.Profile p=profile(a.id);Map<String,Object> m=match(a,p,j);Eligibility.Report eligibility=(Eligibility.Report)m.get("eligibility");if(!eligibility.eligible())throw fail(400,eligibility.blockedMessage());
         if(r.applications().findByStudentIdAndJobId(a.id,j.id).isPresent())throw fail(409,"You have already applied for this opening");
         Model.Application x=new Model.Application();x.studentId=a.id;x.jobId=j.id;x.coverLetter=clean(d.coverLetter());x.matchScore=(double)m.get("score");
         x.resumeId=r.resumes().findByUserIdOrderByCreatedAtDesc(a.id).stream().findFirst().map(z->z.id).orElse(null);r.applications().save(x);event(x,a,"Application submitted");
@@ -143,7 +147,7 @@ public class Platform {
         Model.Job j=jobId==null?null:ownJob(recruiter,jobId);
         return r.accounts().findAll().stream().filter(a->a.role==Model.Role.STUDENT&&a.enabled).filter(a->j==null||canSee(a,j)).filter(a->profile(a.id).visibleToRecruiters)
             .filter(a->(a.name+" "+String.join(" ",profile(a.id).skills)).toLowerCase().contains(clean(q).toLowerCase()))
-            .map(a->{Map<String,Object> v=map("user",map("id",a.id,"name",a.name,"department",a.department,"graduationYear",a.graduationYear),"profile",profile(a.id),"projects",r.projects().findByUserIdOrderByCreatedAtDesc(a.id));if(j!=null)v.put("match",match(profile(a.id),j));return v;}).toList();
+            .map(a->{Map<String,Object> v=map("user",map("id",a.id,"name",a.name,"department",a.department,"graduationYear",a.graduationYear),"profile",profile(a.id),"projects",r.projects().findByUserIdOrderByCreatedAtDesc(a.id));if(j!=null)v.put("match",match(a,profile(a.id),j));return v;}).toList();
     }
     List<Model.Account> scopedStudents(Model.Account actor,Integer year,String department) {return r.accounts().findAll().stream().filter(a->a.role==Model.Role.STUDENT&&a.enabled)
         .filter(a->actor.role==Model.Role.ADMIN||Objects.equals(actor.universityId,a.universityId)).filter(a->year==null||Objects.equals(year,a.graduationYear))

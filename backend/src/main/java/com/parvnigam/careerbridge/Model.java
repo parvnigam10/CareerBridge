@@ -87,6 +87,10 @@ public final class Model {
         public String employmentType="INTERNSHIP"; public String workMode="HYBRID";
         public Integer salaryMin=0; public Integer salaryMax=0; public Integer openings=1;
         public Double minCgpa=0.0; public Double minExperience=0.0;
+        public Double minTenthPercentage, minSecondaryPercentage;
+        public Integer maxActiveBacklogs;
+        @ElementCollection(fetch=FetchType.EAGER) public Set<String> allowedBranches=new LinkedHashSet<>();
+        @ElementCollection(fetch=FetchType.EAGER) public Set<Integer> allowedGraduationYears=new LinkedHashSet<>();
         public String status="ACTIVE"; public LocalDate deadline;
         public Long universityId;
         @ElementCollection(fetch=FetchType.EAGER) public List<String> requiredSkills=new ArrayList<>();

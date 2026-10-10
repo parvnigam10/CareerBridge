@@ -79,3 +79,15 @@ Python tests check the generated-question response parser and provider-failure f
 - New academic results and backlog fields are self-declared. School-mark eligibility and document verification are not implemented in this update. College CGPA still uses the existing 10-point matching system.
 
 These checks ran on Linux with Java 17 and Node.js 24. Windows startup instructions are included; this update was not executed on a Windows host or a live PostgreSQL instance.
+
+## Job eligibility update — 10 October 2026
+
+- Backend: 25 tests passed (14 existing workflow tests, 4 academic tests, 6 eligibility integration tests, and the application context test). Eligibility tests exercise inclusive cutoffs, each failing rule, missing details versus zero backlogs, diploma percentages, school CGPA/grade review, direct API enforcement, input validation, job ownership, clearing rules, and retention of existing applications after requirements change.
+- Frontend: `npm ci` and the production build passed.
+- Browser: the existing 46-page check passed across all four roles. `npm run test:eligibility` also passed recruiter create/edit persistence, graduation-year validation, missing details, below-cutoff and backlog explanations, eligibility filters, exact-threshold application, mobile dialog overflow, recruiter candidate comparisons, and a cutoff changed after the student opened the application form. No JavaScript errors or API 5xx responses occurred in either browser check. Screenshots/results use ignored `frontend/target/` directories.
+- Compatibility: upgraded an existing persistent H2 database from the academic-profile build. Accounts, active JWT sessions, the full student/academic profile, job settings, application history and stored match score, and the submitted resume/download were preserved. New rule columns and branch/year collections saved successfully and survived a further backend restart.
+- New restrictions default to absent on existing openings. School percentage cutoffs do not guess a conversion from CGPA or letter grades. Academic records remain self-declared; this feature does not verify marks documents or implement recruiter overrides.
+
+To repeat the focused browser check, follow the isolated database setup above, then run `npm.cmd run test:eligibility` in the frontend terminal. It can follow `test:e2e` on the same isolated database. Do not use your normal database: the checks change demo academics and create openings/applications.
+
+These checks ran on Linux with Java 17 and Node.js 24. A Windows host, a live PostgreSQL instance, and external email delivery were not exercised for this update.

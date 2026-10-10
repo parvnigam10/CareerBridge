@@ -14,7 +14,12 @@ public final class Inputs {
         @NotBlank @Size(max=150) String location,@NotBlank String employmentType,@NotBlank String workMode,
         @Min(0) Integer salaryMin,@Min(0) Integer salaryMax,@Min(1) Integer openings,
         @DecimalMin("0.0") @DecimalMax("10.0") Double minCgpa,@DecimalMin("0.0") Double minExperience,
-        @FutureOrPresent LocalDate deadline,Long universityId,@NotNull @Size(min=1,max=40) List<@NotBlank @Size(max=60) String> requiredSkills) {}
+        @FutureOrPresent LocalDate deadline,Long universityId,@NotNull @Size(min=1,max=40) List<@NotBlank @Size(max=60) String> requiredSkills,
+        @DecimalMin("0.0") @DecimalMax("100.0") Double minTenthPercentage,
+        @DecimalMin("0.0") @DecimalMax("100.0") Double minSecondaryPercentage,
+        @Min(0) @Max(50) Integer maxActiveBacklogs,
+        @Size(max=30) List<@NotBlank @Size(max=100) String> allowedBranches,
+        @Size(max=30) List<@NotNull @Min(1960) @Max(2100) Integer> allowedGraduationYears) {}
     public record Project(@NotBlank @Size(max=140) String title,@Size(max=4000) String description,
         @Size(max=200) String stack,@Size(max=2048) String repositoryUrl,@Size(max=2048) String liveUrl) {}
     public record Academics(
