@@ -1,0 +1,42 @@
+name: Email verification browser checks
+on:
+  pull_request:
+    paths:
+      - 'frontend/src/VerifyEmailPage.jsx'
+      - 'frontend/src/style.css'
+      - 'frontend/tests/email-ui-smoke.cjs'
+      - 'backend/src/main/java/com/parvnigam/careerbridge/VerificationMail.java'
+      - 'backend/src/main/java/com/parvnigam/careerbridge/ApiController.java'
+      - '.github/workflows/email-ui.yml'
+permissions:
+  contents: read
+jobs:
+  email-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: sh mvnw -B package -DskipTests
+        working-directory: backend
+      - run: npm ci
+        working-directory: frontend
+      - run: npx playwright install --with-deps chromium
+        working-directory: frontend
+      - run: node tests/email-ui-smoke.cjs
+        working-directory: frontend
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: email-ui-checks
+          path: frontend/target/email-ui-checks
+          retention-days: 7

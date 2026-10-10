@@ -12,8 +12,8 @@ powershell -ExecutionPolicy Bypass -File .\start-dev.ps1 -EmailTesting
 
 1. Open http://localhost:5173/register and register a new student or recruiter. Use a test address such as `my-student@example.com`. Use a new CareerBridge password.
 2. Attempt login before verification: it must be blocked.
-3. Open http://127.0.0.1:8025 and refresh. Find the message for your test address and click **Verify email**.
-4. Click **Confirm email address** on CareerBridge, then sign in with the registered credentials.
+3. On the CareerBridge verification page click **Open test inbox**. It uses the same tab and filters messages for your registration address. Click **Verify email** on the latest message. You can also bookmark http://127.0.0.1:8025 for direct access; there is no need to ask for its address again.
+4. Click **Confirm email address**, then **Continue to sign in** with the registered credentials. The inbox, verification and sign-in steps reuse the same tab.
 5. Reopen the same message/link and confirm again: it must be rejected. Use **Resend verification email** on login to request a replacement (wait 60 seconds).
 
 The optional inbox binds only to 127.0.0.1, accepts localhost/127.0.0.1 Host headers, has no public application API, and keeps at most 200 messages in memory. Anyone using the same computer can read it. Messages clear when the backend stops; pending accounts and hashed links persist. Never enable LOCAL_EMAIL_TESTING on a shared or live server. It is an email capture tool; it does not prove ownership of a real inbox or test SMTP delivery. LOCAL_INBOX_PORT changes 8025 if needed.
@@ -44,3 +44,5 @@ Existing accounts, including demo and administrator-provisioned accounts, retain
 - GET /api/auth/me includes emailVerified and emailVerificationStatus (VERIFIED/PENDING/EXISTING_ACCOUNT).
 
 Verification links use a URL fragment to keep the raw token out of server request URLs. Confirmation uses POST, and successful consumption increments authVersion. Account locking serializes resend/confirmation; raw tokens and SMTP details are never logged. Limits reset on restart and are not distributed; a live multi-instance deployment needs shared rate limiting.
+
+The inbox includes **Refresh inbox**, **Back to verification**, and **Show all** actions. Messages appear newest first, and older links are labelled. The app shows **Open test inbox** only when the opt-in local inbox is running; SMTP users continue to use their own email inbox. Opening a direct link from this chat may still create a separate tab: use the in-app button for the same-tab flow.

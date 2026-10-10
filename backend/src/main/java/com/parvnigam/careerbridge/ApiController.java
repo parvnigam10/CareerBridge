@@ -20,6 +20,7 @@ public class ApiController {
     final Map<String,Attempt> attempts=new ConcurrentHashMap<>();
     record Attempt(int count,Instant until){}
     public ApiController(EmailVerification verification,Platform p,Store r,ResumeService resumes,CareerService career,JwtEncoder encoder,PasswordEncoder passwords,NotificationService notices,jakarta.persistence.EntityManager entityManager){this.verification=verification;this.notices=notices;this.entityManager=entityManager;this.p=p;this.r=r;this.resumes=resumes;this.career=career;this.encoder=encoder;this.passwords=passwords;}
+    @GetMapping("/public/email-testing") Object emailTesting(){return Platform.map("enabled",verification.mail.inbox!=null,"inboxUrl",verification.mail.inbox==null?null:"http://127.0.0.1:"+verification.mail.inbox.getAddress().getPort()+"/");}
     @GetMapping("/public/universities") Object universities(){return r.universities().findAll();}
     @GetMapping("/public/jobs") Object publicJobs(@RequestParam(defaultValue="")String q,@RequestParam(defaultValue="")String type,@RequestParam(defaultValue="")String mode){return p.jobs(null,q,type,mode,false);}
     @GetMapping("/public/jobs/{id}") Object publicJob(@PathVariable Long id){Model.Job j=p.job(id);if(j.universityId!=null||!p.active(j))throw Platform.fail(404,"Job not found");return p.jobView(j,null);}
