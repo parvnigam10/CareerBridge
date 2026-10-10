@@ -131,3 +131,6 @@ Interview feedback uses keyword coverage and answer length. It is a practice aid
 Do not describe these extensions as implemented on your resume. The working four-role platform is already a substantial project.
 
 See [docs/API.md](docs/API.md), [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) and [docs/VERIFICATION.md](docs/VERIFICATION.md) for reference after your first run.
+
+### Email verification
+New student/recruiter registration requires confirmation with a single-use 24-hour email link. Test locally without extra installation using `start-dev.ps1 -EmailTesting` and the loopback inbox at http://127.0.0.1:8025. Configure SMTP for real email delivery. Existing accounts retain access under an explicit compatibility policy. See [setup and behavior](docs/EMAIL_VERIFICATION.md).

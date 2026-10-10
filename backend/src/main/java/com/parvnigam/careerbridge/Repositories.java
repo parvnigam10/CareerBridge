@@ -4,7 +4,14 @@ import java.util.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public final class Repositories {
-    public interface Accounts extends JpaRepository<Model.Account,Long> { Optional<Model.Account> findByEmail(String email); }
+    public interface Accounts extends JpaRepository<Model.Account,Long> { Optional<Model.Account> findByEmail(String email);
+        @org.springframework.data.jpa.repository.Query("select a.id from Account a where a.verificationHash = :hash")
+        Optional<Long> verificationAccountId(@org.springframework.data.repository.query.Param("hash") String hash);
+        @org.springframework.data.jpa.repository.Query("select a.id from Account a where a.email = :email")
+        Optional<Long> emailAccountId(@org.springframework.data.repository.query.Param("email") String email);
+        @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+        @org.springframework.data.jpa.repository.Query("select a from Account a where a.id = :id")
+        Optional<Model.Account> lockAccount(@org.springframework.data.repository.query.Param("id") Long id); }
     public interface Universities extends JpaRepository<Model.University,Long> {}
     public interface Profiles extends JpaRepository<Model.Profile,Long> { Optional<Model.Profile> findByUserId(Long id); }
     public interface Projects extends JpaRepository<Model.Project,Long> { List<Model.Project> findByUserIdOrderByCreatedAtDesc(Long id); }

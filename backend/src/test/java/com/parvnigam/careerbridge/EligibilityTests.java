@@ -13,8 +13,9 @@ import tools.jackson.databind.json.JsonMapper;
 @SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT,properties={
     "spring.datasource.url=jdbc:h2:mem:eligibility;MODE=PostgreSQL;DB_CLOSE_DELAY=-1",
     "spring.jpa.hibernate.ddl-auto=create-drop","app.upload-dir=target/eligibility-test-resumes",
-    "app.mail-enabled=false","app.ai-url=","app.redis-enabled=false"})
+    "app.mail-enabled=false","app.local-email-testing=true","app.local-inbox-port=0","app.ai-url=","app.redis-enabled=false"})
 class EligibilityTests {
+    @org.springframework.beans.factory.annotation.Autowired VerificationMail mail;
     @LocalServerPort int port;
     final HttpClient http=HttpClient.newHttpClient();
     final JsonMapper json=JsonMapper.builder().build();
@@ -32,7 +33,7 @@ class EligibilityTests {
     String student()throws Exception {
         long university=tree(call("GET","/public/universities",null,null)).get(0).get("id").asLong();
         var response=call("POST","/auth/register",null,Map.of("name","Eligibility Test Student","email",UUID.randomUUID()+"@example.com","password","Strong@12345","role","STUDENT","universityId",university,"department","Computer Science","graduationYear",2028));
-        assertEquals(201,response.statusCode(),response.body());return tree(response).get("token").asText();
+        assertEquals(201,response.statusCode(),response.body());var message=mail.messages.get(mail.messages.size()-1);assertEquals(200,call("POST","/auth/verify-email",null,Map.of("token",message.link().substring(message.link().indexOf("#token=")+7))).statusCode());return tree(call("POST","/auth/login",null,Map.of("email",message.to(),"password","Strong@12345"))).get("token").asText();
     }
     Map<String,Object> academicInput() {
         return new LinkedHashMap<>(Map.of("tenthScoreType","PERCENTAGE","tenthScore",60.0,"secondaryQualification","TWELFTH","secondaryScoreType","PERCENTAGE","secondaryScore",60.0,"cgpa",7.0,"department","Computer Science","graduationYear",2028,"activeBacklogs",0));

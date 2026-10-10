@@ -106,3 +106,10 @@ Recruiters: open **Your openings → New opening / Edit → Who can apply**. Ent
 Students: open **Opportunities**, use the **Eligibility** filter, and open a job to see its requirements and your result for each one. **Details needed** means missing values or a school result format that cannot be compared with a percentage. Use the **Update academic details** link and enter your institution-reported values. Matching ignores branch-name letter case and extra spaces, but does not guess abbreviations or CGPA-to-percentage conversions. Academic records remain self-declared.
 
 Compatibility and eligibility are separate. A high match score does not bypass a cutoff. Existing applications remain in their pipeline if requirements change later.
+
+## Test email verification
+
+Start with `powershell -ExecutionPolicy Bypass -File .\start-dev.ps1 -EmailTesting`.
+Register a new account, open http://127.0.0.1:8025, click its verification link, confirm, then sign in.
+Existing accounts keep working. New registration requires the local testing option or configured SMTP.
+See [email verification instructions](docs/EMAIL_VERIFICATION.md) for real delivery and limits.

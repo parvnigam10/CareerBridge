@@ -14,7 +14,7 @@ public final class Model {
         @Version public long version;
         public Instant createdAt = Instant.now();
     }
-    @Entity @Table(name="accounts")
+    @Entity(name="Account") @Table(name="accounts")
     public static class Account extends Base {
         @Column(nullable=false,unique=true) public String email;
         @Column(nullable=false) public String passwordHash;
@@ -22,6 +22,12 @@ public final class Model {
         @Enumerated(EnumType.STRING) public Role role;
         public boolean enabled=true;
         public int authVersion=0;
+        // Null marks a pre-verification account; only new public registrations are pending.
+        public Boolean emailVerified;
+        public Instant emailVerifiedAt;
+        @Column(unique=true,length=64) public String verificationHash;
+        public Instant verificationExpiresAt;
+        public Instant verificationSentAt;
         public Long universityId;
         public String department="Computer Science";
         public Integer graduationYear=2028;

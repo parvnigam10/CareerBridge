@@ -14,8 +14,9 @@ import tools.jackson.databind.json.JsonMapper;
 @SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT,properties={
     "spring.datasource.url=jdbc:h2:mem:academics;MODE=PostgreSQL;DB_CLOSE_DELAY=-1",
     "spring.jpa.hibernate.ddl-auto=create-drop","app.upload-dir=target/academic-test-resumes",
-    "app.mail-enabled=false","app.ai-url=","app.redis-enabled=false"})
+    "app.mail-enabled=false","app.local-email-testing=true","app.local-inbox-port=0","app.ai-url=","app.redis-enabled=false"})
 class AcademicTests {
+    @org.springframework.beans.factory.annotation.Autowired VerificationMail mail;
     @LocalServerPort int port;
     final HttpClient http=HttpClient.newHttpClient();
     final JsonMapper json=JsonMapper.builder().build();
@@ -33,7 +34,7 @@ class AcademicTests {
     String student()throws Exception {
         long university=tree(call("GET","/public/universities",null,null)).get(0).get("id").asLong();
         var response=call("POST","/auth/register",null,Map.of("name","Academic Test Student","email",UUID.randomUUID()+"@example.com","password","Strong@12345","role","STUDENT","universityId",university));
-        assertEquals(201,response.statusCode(),response.body());return tree(response).get("token").asText();
+        assertEquals(201,response.statusCode(),response.body());var message=mail.messages.get(mail.messages.size()-1);assertEquals(200,call("POST","/auth/verify-email",null,Map.of("token",message.link().substring(message.link().indexOf("#token=")+7))).statusCode());return tree(call("POST","/auth/login",null,Map.of("email",message.to(),"password","Strong@12345"))).get("token").asText();
     }
     Map<String,Object> academicInput() {
         var d=new LinkedHashMap<String,Object>();

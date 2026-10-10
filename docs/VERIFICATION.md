@@ -91,3 +91,12 @@ These checks ran on Linux with Java 17 and Node.js 24. Windows startup instructi
 To repeat the focused browser check, follow the isolated database setup above, then run `npm.cmd run test:eligibility` in the frontend terminal. It can follow `test:e2e` on the same isolated database. Do not use your normal database: the checks change demo academics and create openings/applications.
 
 These checks ran on Linux with Java 17 and Node.js 24. A Windows host, a live PostgreSQL instance, and external email delivery were not exercised for this update.
+
+## Email verification update — 11 October 2026
+
+- Backend source compiled against the previously built application's cached dependencies and started successfully on Java 17.
+- An isolated Spring/HTTP integration harness passed 33 checks: pending registration without JWT, hash storage, blocked login and direct API access, successful student/recruiter confirmation, single use, expiry, replacement and cooldown, invalid/disabled-account links, concurrent confirmation, local inbox escaping/binding/cache controls, rate limits, and legacy-account compatibility.
+- A copied persistent H2 database upgrade preserved all original values across 21 tables. Unconfigured email rolled registration back, and the local inbox remained disabled by default.
+- Frontend production build passed.
+- Seven JUnit verification tests were added, and registration helpers in existing suites now confirm their test emails. The complete Maven/JUnit suite has not been run in this environment: the Maven repository is unreachable. Browser binaries are unavailable, so browser interaction and Windows launcher execution are not claimed as tested.
+- Real SMTP delivery has not been tested. The local capture inbox verifies application behavior only. GitHub CI remains to be run after publishing authorization.
