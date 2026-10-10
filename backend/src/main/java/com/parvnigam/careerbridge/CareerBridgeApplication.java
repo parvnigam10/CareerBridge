@@ -20,6 +20,7 @@ public class CareerBridgeApplication {
 			Model.Account.class.getName(),
 			Model.University.class.getName(),
 			Model.Profile.class.getName(),
+			Model.Academics.class.getName(),
 			Model.Project.class.getName(),
 			Model.Education.class.getName(),
 			Model.Experience.class.getName(),

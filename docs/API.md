@@ -17,6 +17,7 @@ Send it to `POST /auth/login`. The response contains `token` and `user`; passwor
 | Signed in | GET `/auth/me`; POST `/auth/logout`; PATCH `/account` | Current user, revoke sessions, rename/change password |
 | Signed in | GET `/dashboard`, `/jobs`, `/jobs/{id}` | Role dashboard and accessible openings |
 | Student | GET/PUT `/student/profile` | Profile and aggregate profile view |
+| Student | PUT `/student/academics` | Save optional 10th, 12th/diploma, college, semester, and backlog fields; update the student’s branch, graduation year, and 10-point college CGPA |
 | Student | POST `/student/projects`, `/student/education`, `/student/experience`; DELETE respective `/{id}` | Profile entries |
 | Student | GET `/student/recommendations`, `/student/learning` | Ranked openings and skill gaps |
 | Student | GET `/student/saved`; POST/DELETE `/student/saved/{jobId}` | Saved jobs |
@@ -86,3 +87,11 @@ stateDiagram-v2
 ```
 
 A student may withdraw from Applied, Shortlisted or Interview. Stage changes record events and notify the student. Scheduling moves a shortlisted application to Interview. The submitted resume version is preserved: it cannot be deleted while referenced by an application.
+
+## Structured academics
+
+`GET /student/profile` returns `profile.academics` (null for existing profiles with no new fields), the college CGPA in `profile.cgpa`, and branch/graduation year in `user`. `PUT /student/academics` replaces the academic section for the authenticated student, using the `Inputs.Academics` field names. Omitted numeric values are stored as null, and an empty academic request clears that section. It does not accept an editable university membership or another student's ID.
+
+School result formats are `PERCENTAGE` (0–100), `CGPA` (score no greater than the supplied positive scale, at most 10), or `GRADE` (text up to 30 characters). A score needs its format; a secondary record needs qualification `TWELFTH` or `DIPLOMA`. Incomplete records can be saved. Passing years must not be in the future or precede the previous qualification. College graduation can be a future year. College CGPA remains on the existing 10-point scale, without automatic percentage conversion.
+
+These records are self-declared. They appear in visible recruiter candidates, authorized application reviews, university-scoped placement views, and the placement CSV. Exported unknown values are blank and result formats retain their units. College CGPA continues to drive existing eligibility; school marks and backlogs are stored and displayed but do not introduce new job filters in this update.

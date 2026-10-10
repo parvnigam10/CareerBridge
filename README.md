@@ -9,7 +9,7 @@ A student career, recruitment and university placement platform with a React fro
 | Area | Implemented behavior |
 | --- | --- |
 | Authentication | Student/recruiter registration, BCrypt passwords, signed JWTs, four roles, ownership checks, login attempt limiting, session revocation on logout/password change/disable |
-| Student profile | Skills, academic details, projects, education, experience and recruiter discovery preference |
+| Student profile | Skills, structured 10th/12th/diploma results, college details, semester/backlogs/gaps, projects, additional education, experience and recruiter discovery preference |
 | Resumes | Private PDF/DOCX/TXT uploads, text extraction, dictionary skill detection, version history and authorized downloads |
 | Opportunities | Public and campus openings, search/type/work-mode filters, saved jobs, eligibility and explainable compatibility scores |
 | Recommendations | Skill, CGPA, experience and location scoring; optional TF-IDF text ranking from Python |
