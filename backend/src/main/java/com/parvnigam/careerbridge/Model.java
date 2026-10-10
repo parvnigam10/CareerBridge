@@ -34,7 +34,8 @@ public final class Model {
         public String headline="";
         @Column(length=4000) public String about="";
         public String city="";
-        public Double cgpa=0.0;
+        public Double cgpa;
+        @Embedded public Academics academics;
         public Double experienceYears=0.0;
         public String preferredRole="Software Engineer";
         public String githubUsername="";
@@ -43,6 +44,17 @@ public final class Model {
         public Instant codingSyncedAt;
         public boolean visibleToRecruiters=true;
         @ElementCollection(fetch=FetchType.EAGER) public List<String> skills=new ArrayList<>();
+    }
+    @Embeddable
+    public static class Academics {
+        public String tenthInstitution, tenthBoard, tenthScoreType, tenthGrade;
+        public Integer tenthYear;
+        public Double tenthScore, tenthScale;
+        public String secondaryQualification, secondaryInstitution, secondaryBoard, secondaryScoreType, secondaryGrade;
+        public Integer secondaryYear;
+        public Double secondaryScore, secondaryScale;
+        public String collegeInstitution, degree;
+        public Integer currentSemester, activeBacklogs, clearedBacklogs, gapYears;
     }
     @Entity @Table(name="student_projects")
     public static class Project extends Base {

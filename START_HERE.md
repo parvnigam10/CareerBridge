@@ -88,3 +88,11 @@ For a simple end-to-end demo:
 The app already has explainable matching, learning suggestions and text interview practice without an external AI provider. Python adds TF-IDF text ranking. Generated questions require your own configured API credentials. Email needs SMTP credentials. See `README.md` and `docs/INTEGRATIONS.md` when you want to enable them.
 
 Stop each development server with Ctrl+C. Data persists between restarts.
+
+## Updating to structured academic profiles
+
+After merging the academic profile pull request, stop both development servers, fetch/pull `main` in GitHub Desktop, then run `start-dev.ps1` again. Keep `backend/data`; the existing local `update` schema setting adds nullable academic columns without resetting your accounts, resumes, or applications. Back up that folder before the first updated startup.
+
+Sign in as a student and open **My profile → Academic details**. Add 10th, 12th or diploma, college, semester, backlog and gap information, then select **Save academic details**. Fields can be left blank. The general education list is retained for additional qualifications. College CGPA has moved into the academic section and remains on a 10-point scale. School results keep their original percentage, CGPA scale, or letter grade.
+
+Recruiters can see school results in candidate cards and complete records in application reviews. Placement officers can open **View academics** in their student table and export the extended CSV. Records are self-declared; document verification and school-mark job eligibility are future changes.

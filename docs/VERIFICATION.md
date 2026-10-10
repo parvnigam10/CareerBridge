@@ -69,3 +69,13 @@ Remove-Item Env:UPLOAD_DIR
 Docker runtime, a live PostgreSQL/Redis server, authenticated SMTP delivery, real provider-generated questions and public GitHub sync were not exercised in this environment. They require their respective runtime/network/credentials. Configuration and adapters are included; these checks do not establish production readiness or external delivery guarantees.
 
 Python tests check the generated-question response parser and provider-failure fallback with mocked requests. No paid-provider request was made. Match scoring and practice feedback are deterministic aids, not independently validated models.
+
+## Structured academic profile update — 10 October 2026
+
+- Backend: 19 tests passed (14 existing workflow tests, 4 academic integration tests, and the application context test).
+- Frontend: `npm ci` and the production build passed.
+- Browser: 46 page visits passed across all four roles, with no JavaScript errors or API 5xx responses. Academic coverage includes save/reload, result-format changes, chronology errors, preservation during general-profile edits, recruiter candidate/application views, campus academic review, and mobile overflow checks. Backend tests also cover incomplete/cleared records and access control.
+- Compatibility: started the previous main build with a persistent H2 database, uploaded a resume, then restarted the updated build against that same database. Existing accounts, JWT session, CGPA, projects, education, applications and resume download were preserved; new academic columns accepted a saved record.
+- New academic results and backlog fields are self-declared. School-mark eligibility and document verification are not implemented in this update. College CGPA still uses the existing 10-point matching system.
+
+These checks ran on Linux with Java 17 and Node.js 24. Windows startup instructions are included; this update was not executed on a Windows host or a live PostgreSQL instance.

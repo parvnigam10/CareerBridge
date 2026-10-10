@@ -19,3 +19,16 @@
 @media(max-width:380px){.public-header{padding-left:20px;padding-right:20px}.public-header .brand{font-size:18px}.public-header .button{padding:9px 10px;gap:5px}}
 
 @media(max-width:760px){.sidebar-brand{padding-left:0;padding-right:0}.sidebar .brand{font-size:17px;gap:7px}.sidebar .brand-symbol{width:30px;height:30px}.sidebar .brand small{font-size:5px;letter-spacing:1px}.sidebar-brand .icon-button{flex-shrink:0}}
+
+/* Student academics: the same cream, green and coral profile theme. */
+.academic-panel h2{display:flex;align-items:center;gap:9px}
+.academic-section{border:0;border-top:1px solid var(--line);padding:22px 0 0;margin:24px 0;min-width:0}
+.academic-section legend{font-size:14px;font-weight:600;padding:0 10px 0 0;color:var(--green)}
+.academic-error{color:#9a3636;background:#fff0eb;padding:12px;border-radius:8px;font-size:12px}
+.academic-review{margin:24px 0;padding:20px;background:#f5f6ee;border:1px solid var(--line);border-radius:12px}
+.academic-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 22px;margin:0}
+.academic-facts dt{font-size:11px;color:#738365;margin-bottom:5px}
+.academic-facts dd{margin:0;font-size:12px;overflow-wrap:anywhere}
+.academic-compact{display:flex;flex-wrap:wrap;gap:8px 15px;margin:15px 0;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:11px;color:#738365}
+.academic-compact strong{display:block;color:#294437;margin-top:5px}
+@media(max-width:480px){.academic-facts{grid-template-columns:1fr}.academic-review{padding:16px}}

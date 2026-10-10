@@ -17,6 +17,21 @@ public final class Inputs {
         @FutureOrPresent LocalDate deadline,Long universityId,@NotNull @Size(min=1,max=40) List<@NotBlank @Size(max=60) String> requiredSkills) {}
     public record Project(@NotBlank @Size(max=140) String title,@Size(max=4000) String description,
         @Size(max=200) String stack,@Size(max=2048) String repositoryUrl,@Size(max=2048) String liveUrl) {}
+    public record Academics(
+        @Size(max=200) String tenthInstitution, @Size(max=100) String tenthBoard,
+        @Min(1960) @Max(2100) Integer tenthYear, @Pattern(regexp="PERCENTAGE|CGPA|GRADE") String tenthScoreType,
+        @DecimalMin("0.0") @DecimalMax("100.0") Double tenthScore,
+        @DecimalMin(value="0.0",inclusive=false) @DecimalMax("10.0") Double tenthScale, @Size(max=30) String tenthGrade,
+        @Pattern(regexp="TWELFTH|DIPLOMA") String secondaryQualification,
+        @Size(max=200) String secondaryInstitution, @Size(max=100) String secondaryBoard,
+        @Min(1960) @Max(2100) Integer secondaryYear, @Pattern(regexp="PERCENTAGE|CGPA|GRADE") String secondaryScoreType,
+        @DecimalMin("0.0") @DecimalMax("100.0") Double secondaryScore,
+        @DecimalMin(value="0.0",inclusive=false) @DecimalMax("10.0") Double secondaryScale, @Size(max=30) String secondaryGrade,
+        @Size(max=200) String collegeInstitution, @Size(max=140) String degree, @Size(max=100) String department,
+        @Min(1960) @Max(2100) Integer graduationYear, @Min(1) @Max(16) Integer currentSemester,
+        @DecimalMin("0.0") @DecimalMax("10.0") Double cgpa,
+        @Min(0) @Max(50) Integer activeBacklogs, @Min(0) @Max(50) Integer clearedBacklogs,
+        @Min(0) @Max(20) Integer gapYears) {}
     public record Education(@NotBlank @Size(max=200) String institution,@NotBlank @Size(max=140) String qualification,@Min(1960) @Max(2100) Integer passingYear,@Size(max=60) String grade) {}
     public record Experience(@NotBlank @Size(max=140) String company,@NotBlank @Size(max=140) String title,@Size(max=140) String duration,@Size(max=4000) String description) {}
     public record Apply(@NotNull Long jobId,@Size(max=4000) String coverLetter) {}

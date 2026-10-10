@@ -40,10 +40,11 @@ public class Platform {
         List<String> matched=j.requiredSkills.stream().filter(x->have.contains(x.toLowerCase(Locale.ROOT))).toList();
         List<String> missing=j.requiredSkills.stream().filter(x->!have.contains(x.toLowerCase(Locale.ROOT))).toList();
         double skill=j.requiredSkills.isEmpty()?0:(double)matched.size()/j.requiredSkills.size();
-        double academics=p.cgpa>=j.minCgpa?1:Math.max(0,p.cgpa/Math.max(j.minCgpa,1));
+        double cgpa=p.cgpa==null?0:p.cgpa;
+        double academics=cgpa>=j.minCgpa?1:Math.max(0,cgpa/Math.max(j.minCgpa,1));
         double experience=p.experienceYears>=j.minExperience?1:p.experienceYears/Math.max(j.minExperience,1);
         double location=j.workMode.equals("REMOTE")?1:clean(p.city).equalsIgnoreCase(clean(j.location))?1:0.4;
-        boolean eligible=p.cgpa>=j.minCgpa && p.experienceYears>=j.minExperience;
+        boolean eligible=cgpa>=j.minCgpa && p.experienceYears>=j.minExperience;
         double score=Math.round((skill*.7+academics*.15+experience*.1+location*.05)*1000)/10.0;
         return map("score",score,"matchedSkills",matched,"missingSkills",missing,"eligible",eligible,
             "breakdown",map("skills",Math.round(skill*100),"academics",Math.round(academics*100),"experience",Math.round(experience*100),"location",Math.round(location*100)),
@@ -63,11 +64,50 @@ public class Platform {
             .filter(j->clean(type).isEmpty()||j.employmentType.equals(type)).filter(j->clean(mode).isEmpty()||j.workMode.equals(mode))
             .sorted(Comparator.comparing((Model.Job j)->j.createdAt).reversed()).map(j->jobView(j,a)).toList();
     }
-    Map<String,Object> fullProfile(Model.Account a) {Model.Profile p=profile(a.id);return map("user",user(a),"profile",p,"projects",r.projects().findByUserIdOrderByCreatedAtDesc(a.id),"education",r.educations().findByUserIdOrderByCreatedAtDesc(a.id),"experience",r.experiences().findByUserIdOrderByCreatedAtDesc(a.id),"completion",completion(p,a.id));}
-    int completion(Model.Profile p,Long id) {return (int)Stream.of(!p.headline.isBlank(),!p.about.isBlank(),!p.city.isBlank(),!p.skills.isEmpty(),p.cgpa>0,!r.projects().findByUserIdOrderByCreatedAtDesc(id).isEmpty(),!r.educations().findByUserIdOrderByCreatedAtDesc(id).isEmpty(),!r.resumes().findByUserIdOrderByCreatedAtDesc(id).isEmpty()).filter(Boolean::booleanValue).count()*100/8;}
+    Map<String,Object> fullProfile(Model.Account a) {Model.Profile p=profile(a.id);return map("user",user(a),"university",a.universityId==null?null:r.universities().findById(a.universityId).orElse(null),"profile",p,"projects",r.projects().findByUserIdOrderByCreatedAtDesc(a.id),"education",r.educations().findByUserIdOrderByCreatedAtDesc(a.id),"experience",r.experiences().findByUserIdOrderByCreatedAtDesc(a.id),"completion",completion(p,a.id));}
+    int completion(Model.Profile p,Long id) {return (int)Stream.of(!p.headline.isBlank(),!p.about.isBlank(),!p.city.isBlank(),!p.skills.isEmpty(),p.cgpa!=null,
+        schoolComplete(p.academics,true),schoolComplete(p.academics,false),
+        p.academics!=null && !clean(p.academics.degree).isEmpty() && !clean(p.academics.collegeInstitution).isEmpty(),
+        !r.projects().findByUserIdOrderByCreatedAtDesc(id).isEmpty(),!r.resumes().findByUserIdOrderByCreatedAtDesc(id).isEmpty()).filter(Boolean::booleanValue).count()*100/10;}
+    static boolean schoolComplete(Model.Academics a,boolean tenth) {
+        if(a==null)return false;
+        return !clean(tenth?a.tenthInstitution:a.secondaryInstitution).isEmpty() && !clean(tenth?a.tenthBoard:a.secondaryBoard).isEmpty()
+            && (tenth?a.tenthYear:a.secondaryYear)!=null && (tenth||a.secondaryQualification!=null) && !schoolResult(a,tenth).isEmpty();
+    }
     void updateProfile(Model.Account a,Inputs.Profile d) {
-        Model.Profile p=profile(a.id);p.headline=clean(d.headline());p.about=clean(d.about());p.city=clean(d.city());p.cgpa=d.cgpa()==null?0:d.cgpa();p.experienceYears=d.experienceYears()==null?0:d.experienceYears();
+        Model.Profile p=profile(a.id);p.headline=clean(d.headline());p.about=clean(d.about());p.city=clean(d.city());p.cgpa=d.cgpa();p.experienceYears=d.experienceYears()==null?0:d.experienceYears();
         p.preferredRole=clean(d.preferredRole());p.githubUsername=clean(d.githubUsername());p.leetcodeUsername=clean(d.leetcodeUsername());p.visibleToRecruiters=d.visibleToRecruiters();p.skills=new ArrayList<>(skills(d.skills()));r.profiles().save(p);
+    }
+    void updateAcademics(Model.Account a,Inputs.Academics d) {
+        validateResult("10th",d.tenthScoreType(),d.tenthScore(),d.tenthScale(),d.tenthGrade());
+        validateResult("12th / diploma",d.secondaryScoreType(),d.secondaryScore(),d.secondaryScale(),d.secondaryGrade());
+        if(d.secondaryQualification()==null && (!clean(d.secondaryInstitution()).isEmpty()||!clean(d.secondaryBoard()).isEmpty()||d.secondaryYear()!=null||d.secondaryScoreType()!=null))throw fail(400,"Choose 12th or diploma for your secondary qualification");
+        int now=LocalDate.now().getYear();
+        if((d.tenthYear()!=null&&d.tenthYear()>now)||(d.secondaryYear()!=null&&d.secondaryYear()>now))throw fail(400,"School passing years cannot be in the future");
+        if(d.tenthYear()!=null&&d.secondaryYear()!=null&&d.secondaryYear()<d.tenthYear())throw fail(400,"12th / diploma passing year cannot be before 10th");
+        if(d.secondaryYear()!=null&&d.graduationYear()!=null&&d.graduationYear()<d.secondaryYear())throw fail(400,"College graduation year cannot be before 12th / diploma");
+        if(d.tenthYear()!=null&&d.graduationYear()!=null&&d.graduationYear()<d.tenthYear())throw fail(400,"College graduation year cannot be before 10th");
+        Model.Academics x=new Model.Academics();
+        x.tenthInstitution=clean(d.tenthInstitution());x.tenthBoard=clean(d.tenthBoard());x.tenthYear=d.tenthYear();x.tenthScoreType=d.tenthScoreType();x.tenthScore=d.tenthScore();x.tenthScale=d.tenthScale();x.tenthGrade=clean(d.tenthGrade());
+        x.secondaryQualification=d.secondaryQualification();x.secondaryInstitution=clean(d.secondaryInstitution());x.secondaryBoard=clean(d.secondaryBoard());x.secondaryYear=d.secondaryYear();x.secondaryScoreType=d.secondaryScoreType();x.secondaryScore=d.secondaryScore();x.secondaryScale=d.secondaryScale();x.secondaryGrade=clean(d.secondaryGrade());
+        x.collegeInstitution=clean(d.collegeInstitution());x.degree=clean(d.degree());x.currentSemester=d.currentSemester();x.activeBacklogs=d.activeBacklogs();x.clearedBacklogs=d.clearedBacklogs();x.gapYears=d.gapYears();
+        Model.Profile profile=profile(a.id);profile.academics=x;profile.cgpa=d.cgpa();
+        a.department=clean(d.department());a.graduationYear=d.graduationYear();r.accounts().save(a);r.profiles().save(profile);
+    }
+    static void validateResult(String section,String type,Double score,Double scale,String grade) {
+        if(score!=null&&!Double.isFinite(score)||scale!=null&&!Double.isFinite(scale))throw fail(400,section+": enter a finite score and scale");
+        if(type==null) {if(score!=null||scale!=null||!clean(grade).isEmpty())throw fail(400,section+": choose a result format");return;}
+        if(type.equals("CGPA")) {if(score!=null&&(scale==null||score>scale))throw fail(400,section+": CGPA requires a scale and cannot exceed it");if(!clean(grade).isEmpty())throw fail(400,section+": remove the letter grade when using CGPA");}
+        else if(type.equals("PERCENTAGE")) {if(scale!=null||!clean(grade).isEmpty())throw fail(400,section+": percentage cannot include a CGPA scale or letter grade");}
+        else if(score!=null||scale!=null)throw fail(400,section+": letter grades cannot include numeric scores");
+    }
+    static String schoolResult(Model.Academics a,boolean tenth) {
+        if(a==null)return "";
+        String type=tenth?a.tenthScoreType:a.secondaryScoreType,grade=tenth?a.tenthGrade:a.secondaryGrade;
+        Double score=tenth?a.tenthScore:a.secondaryScore,scale=tenth?a.tenthScale:a.secondaryScale;
+        if("GRADE".equals(type))return clean(grade);
+        if(score==null)return "";
+        return score+("PERCENTAGE".equals(type)?"%":" / "+scale);
     }
     Model.Job saveJob(Model.Account a,Long id,Inputs.Job d) {
         Model.Company c=r.companies().findByUserId(a.id).orElseThrow();if(c.name.isBlank())throw fail(400,"Complete your company profile first");
