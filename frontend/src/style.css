@@ -32,3 +32,26 @@
 .academic-compact{display:flex;flex-wrap:wrap;gap:8px 15px;margin:15px 0;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:11px;color:#738365}
 .academic-compact strong{display:block;color:#294437;margin-top:5px}
 @media(max-width:480px){.academic-facts{grid-template-columns:1fr}.academic-review{padding:16px}}
+
+/* Eligibility keeps profile compatibility separate from application requirements. */
+.eligibility-badge{display:inline-flex;align-items:center;gap:6px;border-radius:20px;padding:6px 10px;font-size:10px;font-weight:600;background:#edf2e6;color:#37593b;max-width:100%}
+.eligibility-badge.not_eligible{background:#fbece6;color:#9b4934}
+.eligibility-badge.details_required{background:#f8f0dc;color:#806027}
+.job-card>.eligibility-badge{margin:14px 0 0}
+.eligibility-report,.eligibility-requirements{margin:22px 0;padding:19px;border:1px solid var(--line);border-radius:12px;background:#f7f8f2}
+.eligibility-requirements dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:18px 0 0}
+.eligibility-requirements dt{font-size:11px;color:#738365;margin-bottom:5px}
+.eligibility-requirements dd{margin:0;font-size:12px;overflow-wrap:anywhere}
+.eligibility-checks{list-style:none;padding:0;margin:0}
+.eligibility-checks li{padding:13px 0;border-bottom:1px solid var(--line)}
+.eligibility-checks li:last-child{border:0}
+.eligibility-checks li>div{display:flex;justify-content:space-between;gap:12px;font-size:12px}
+.eligibility-checks p{font-size:11px;margin:7px 0;color:#68785d;overflow-wrap:anywhere}
+.eligibility-checks small{font-size:11px;line-height:1.6;display:block;color:#738365;overflow-wrap:anywhere}
+.eligibility-check-status{font-size:10px;font-weight:600;color:#37593b;flex-shrink:0}
+.not_met .eligibility-check-status{color:#9b4934}
+.missing .eligibility-check-status,.review_required .eligibility-check-status{color:#806027}
+.eligibility-profile-link{display:inline-block;font-size:12px;margin-top:14px;font-weight:600}
+.eligibility-requirements-compact{display:flex;gap:8px 18px;flex-wrap:wrap;margin-top:15px;font-size:11px;color:#738365;overflow-wrap:anywhere}
+.eligibility-compact{margin:12px 0}.eligibility-compact summary{font-size:11px;cursor:pointer;margin-top:10px}
+@media(max-width:480px){.eligibility-requirements dl{grid-template-columns:1fr}.eligibility-report,.eligibility-requirements{padding:15px}.eligibility-checks li>div{flex-wrap:wrap}.eligibility-fields{grid-column:auto}}

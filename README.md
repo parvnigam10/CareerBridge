@@ -11,7 +11,7 @@ A student career, recruitment and university placement platform with a React fro
 | Authentication | Student/recruiter registration, BCrypt passwords, signed JWTs, four roles, ownership checks, login attempt limiting, session revocation on logout/password change/disable |
 | Student profile | Skills, structured 10th/12th/diploma results, college details, semester/backlogs/gaps, projects, additional education, experience and recruiter discovery preference |
 | Resumes | Private PDF/DOCX/TXT uploads, text extraction, dictionary skill detection, version history and authorized downloads |
-| Opportunities | Public and campus openings, search/type/work-mode filters, saved jobs, eligibility and explainable compatibility scores |
+| Opportunities | Public and campus openings, search/type/work-mode/eligibility filters, saved jobs, explained school/college/branch/year/backlog eligibility and compatibility scores |
 | Recommendations | Skill, CGPA, experience and location scoring; optional TF-IDF text ranking from Python |
 | Applications | Duplicate prevention, submitted resume version capture, cover notes, status timeline and withdrawal |
 | Recruitment | Company profile, job creation/editing/status, candidate search, invitations and controlled pipeline transitions |
@@ -112,7 +112,7 @@ There is one Spring application, organized by responsibility, plus an optional P
 
 ## Matching and AI behavior
 
-The base match uses **70% required skills, 15% academic fit, 10% experience and 5% location/work mode**. Academic and experience minimums are also eligibility checks. The UI explains missing skills and component scores. A score describes profile compatibility, not a hiring probability.
+The base match uses **70% required skills, 15% academic fit, 10% experience and 5% location/work mode**. Academic and experience minimums are also eligibility checks. Recruiters can additionally require 10th and 12th/diploma percentages, allowed branches and graduation years, and a maximum active backlog count. Student views explain each check and distinguish missing details from unmet criteria; the backend enforces the same requirements when applying or inviting. The UI explains missing skills and component scores. A score describes profile compatibility, not a hiring probability.
 
 When Python is configured, recommendation ordering uses 75% base match and 25% TF-IDF cosine text similarity. This is lexical ranking, not a trained prediction model or semantic embeddings. The displayed base compatibility score remains explainable.
 
