@@ -1,9 +1,29 @@
+# Build output and dependencies
 **/target/
 **/node_modules/
 **/dist/
+
+# Local database and uploaded resumes
 **/data/
+
+# Python environments and cache
 **/.venv/
 **/__pycache__/
+*.pyc
+
+# Private environment configuration
 .env
+.env.*
+!.env.example
+
+# IDE settings
+**/.idea/
+**/.vscode/
+*.iml
+*.iws
+*.ipr
+
+# Logs and operating-system files
 *.log
 .DS_Store
+Thumbs.db
