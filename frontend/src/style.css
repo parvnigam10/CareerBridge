@@ -56,4 +56,31 @@
 .eligibility-compact{margin:12px 0}.eligibility-compact summary{font-size:11px;cursor:pointer;margin-top:10px}
 @media(max-width:480px){.eligibility-requirements dl{grid-template-columns:1fr}.eligibility-report,.eligibility-requirements{padding:15px}.eligibility-checks li>div{flex-wrap:wrap}.eligibility-fields{grid-column:auto}}
 
-.verification-page{max-width:760px;margin:0 auto;padding:32px 20px}.verification-page>main{margin-top:32px}.verification-page h1{font-size:clamp(26px,5vw,38px)}.verification-page form{margin-top:28px}.verification-page p{overflow-wrap:anywhere}
+/* Verification layout is independent of workspace panels. */
+.verification-page{min-height:100vh;padding:28px 24px 32px;background:radial-gradient(ellipse at top,#eaf0e8 0,transparent 55%),var(--paper,#f6f6f1)}
+.verification-header{max-width:1040px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.verification-home{font-size:13px;color:var(--muted)}
+.verification-card{width:100%;max-width:480px;margin:48px auto 24px;padding:36px;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 12px 36px #173c3408}
+.verification-icon{height:64px;width:64px;display:flex;align-items:center;justify-content:center;background:#fbece4;color:#b95e36;border-radius:18px;margin-bottom:24px}
+.verification-icon.is-verified{color:var(--green);background:#e9f2ec}
+.verification-card h1{font-size:30px;letter-spacing:-.8px;margin:12px 0}
+.verification-intro{font-size:14px;color:#65736b;margin-bottom:22px}
+.verification-card p,.verification-feedback{overflow-wrap:anywhere}
+.verification-address{font-weight:600;font-size:14px;color:var(--ink)}
+.verification-primary{margin:24px 0}
+.verification-card .button{width:100%;min-height:48px;text-align:center;white-space:normal;font-size:13px}
+.verification-inbox{border:1px solid #dce7df;background:#f5f8f4;padding:20px;border-radius:12px;margin:24px 0}
+.verification-inbox-heading{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:13px;color:var(--green)}
+.verification-inbox-heading span{font-size:9px;letter-spacing:.6px;padding:4px 6px;border-radius:5px;background:#e3ece5;margin-left:auto}
+.verification-inbox p{font-size:12px;color:#64736b;margin:12px 0 16px}
+.verification-resend{border-top:1px solid var(--line);padding-top:20px;margin-top:24px}
+.verification-resend summary{font-size:13px;font-weight:600;color:var(--green);cursor:pointer;min-height:24px}
+.verification-resend form{margin-top:18px}
+.verification-resend .field{margin-bottom:16px}
+.verification-help{font-size:12px;color:var(--muted);margin:12px 0 0}
+.verification-signin{display:block;text-align:center;font-size:13px;margin-top:24px}
+.verification-feedback{font-size:13px;line-height:1.6;padding:14px 16px;border:1px solid;border-radius:10px;margin:18px 0}
+.verification-feedback.error{background:#fff4ed;border-color:#f1d4c3;color:#934727}
+.verification-feedback.success{background:#edf6ef;border-color:#d6e6da;color:var(--green)}
+.verification-footer{text-align:center;font-size:12px;color:var(--muted)}
+@media(max-width:520px){.verification-page{padding:22px 16px}.verification-header .verification-home{font-size:11px}.verification-header .brand-symbol{width:32px;height:32px}.verification-header .brand-wordmark{font-size:19px}.verification-card{margin-top:32px;padding:26px 22px;border-radius:16px}.verification-card h1{font-size:27px}.verification-inbox{padding:16px}.verification-inbox-heading{gap:7px}.verification-inbox-heading span{margin-left:0}}
