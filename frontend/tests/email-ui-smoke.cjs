@@ -17,6 +17,7 @@ async function wait(url){const until=Date.now()+90000;while(Date.now()<until){tr
   await Promise.all([wait('http://127.0.0.1:8087/actuator/health'),wait(BASE)]);
   browser=await chromium.launch({headless:true});const context=await browser.newContext();const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=500)errors.push(r.url()+': '+r.status());});
   await page.goto(BASE+'/register');await page.getByLabel('Full name',{exact:true}).fill('Inbox Flow Tester');await page.getByLabel('Email address',{exact:true}).fill('inbox-flow@example.com');await page.getByLabel('Password',{exact:true}).fill('Strong@12345');await page.locator('select[name="universityId"]').selectOption({index:1});await page.getByRole('button',{name:'Create account'}).click();await page.waitForURL('**/verify-email');
+  const mainBrandColour=await page.locator('.verification-header .brand').evaluate(el=>getComputedStyle(el).color);
   await page.getByRole('link',{name:'Open test inbox'}).waitFor();assert.equal(await page.getByRole('link',{name:'Open test inbox'}).getAttribute('target'),'_self');
   for(const width of [1280,390]){await page.setViewportSize({width,height:900});await page.screenshot({path:path.join(OUT,'verification-'+width+'.png'),fullPage:true});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'Verification overflow '+width);}
   await page.getByRole('link',{name:'Open test inbox'}).click();await page.waitForURL('http://127.0.0.1:8027/**');assert.equal(context.pages().length,1);assert.equal(await page.locator('article.message').count(),1);assert(await page.getByText('inbox-flow@example.com',{exact:true}).count()>0);
@@ -24,7 +25,7 @@ async function wait(url){const until=Date.now()+90000;while(Date.now()<until){tr
   async function checkInboxBrand(){
     const mainIcon=await (await fetch(BASE+'/careerbridge-icon.svg')).text();
     const actual=await page.locator('.inbox-header .brand').evaluate(el=>({label:el.getAttribute('aria-label'),color:getComputedStyle(el.querySelector('.brand-wordmark')).color,wordmark:el.querySelector('.brand-wordmark').childNodes[0].textContent,tagline:el.querySelector('small').textContent,icon:el.querySelector('svg').outerHTML,href:el.href}));
-    assert.equal(actual.label,'CareerBridge home');assert.equal(actual.wordmark,'careerbridge');assert.equal(actual.color,'rgb(23, 60, 52)');assert.equal(actual.tagline,'PREPARE. CONNECT. GROW.');assert.equal(actual.href,BASE+'/');
+    assert.equal(actual.label,'CareerBridge home');assert.equal(actual.wordmark,'careerbridge');assert.equal(actual.color,mainBrandColour);assert.equal(actual.tagline,'PREPARE. CONNECT. GROW.');assert.equal(actual.href,BASE+'/');
     const shapes=svg=>[...svg.matchAll(/<(?:rect|g|path)\b[^>]*>/g)].map(m=>m[0].replace(/\/>$/,'>'));assert.deepEqual(shapes(actual.icon),shapes(mainIcon),'Inbox uses the app vector icon and its original colours');
   }
   await checkInboxBrand();

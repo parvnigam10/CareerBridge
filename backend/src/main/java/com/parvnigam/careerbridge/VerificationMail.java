@@ -59,7 +59,7 @@ public class VerificationMail {
             a{color:#173c34;text-decoration:none}a:focus-visible{outline:3px solid #ec8356;outline-offset:4px}
             .inbox-shell{max-width:900px;margin:0 auto;padding:32px 24px 40px}
             .inbox-header{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:44px}
-            .brand{display:inline-flex;align-items:center;gap:10px;color:#173c34;font-size:23px;font-weight:700;letter-spacing:-1.1px;line-height:1;flex-shrink:0}.brand-symbol{width:41px;height:41px;display:block;flex-shrink:0;border-radius:11px}.brand small{display:block;color:inherit;font-size:6.2px;font-weight:500;letter-spacing:1.35px;margin-top:7px}
+            .brand{display:inline-flex;align-items:center;gap:10px;color:#223331;font-size:23px;font-weight:700;letter-spacing:-1.1px;line-height:1;flex-shrink:0}.brand-symbol{width:41px;height:41px;display:block;flex-shrink:0;border-radius:11px}.brand small{display:block;color:inherit;font-size:6.2px;font-weight:500;letter-spacing:1.35px;margin-top:7px}
             .mode{padding:5px 9px;border-radius:6px;background:#e7ede5;color:#355246;font-size:10px;font-weight:700;letter-spacing:1px;white-space:nowrap}
             .inbox-title{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:24px}
             h1{font-size:32px;line-height:1.25;letter-spacing:-1px;margin:0 0 10px}h2{font-size:20px;line-height:1.4;margin:16px 0 8px}
