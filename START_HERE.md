@@ -95,7 +95,7 @@ After merging the academic profile pull request, stop both development servers, 
 
 Sign in as a student and open **My profile → Academic details**. Add 10th, 12th or diploma, college, semester, backlog and gap information, then select **Save academic details**. Fields can be left blank. The general education list is retained for additional qualifications. College CGPA has moved into the academic section and remains on a 10-point scale. School results keep their original percentage, CGPA scale, or letter grade.
 
-Recruiters can see school results in candidate cards and complete records in application reviews. Placement officers can open **View academics** in their student table and export the extended CSV. Records are self-declared; document verification is a future change. Job eligibility rules are described below.
+Recruiters can see school results in candidate cards and complete records in application reviews. Placement officers can open **View academics** in their student table and export the extended CSV. Records start as self-declared and can receive campus approval through **Academic document review** below. Job eligibility rules are described below.
 
 ## Job eligibility update
 
@@ -103,7 +103,7 @@ After merging the eligibility pull request, stop both servers, back up `backend/
 
 Recruiters: open **Your openings → New opening / Edit → Who can apply**. Enter school percentage cutoffs, college CGPA, branch/year lists and a maximum active backlog count. Leave optional rules blank to allow everyone; a backlog limit of 0 means no active backlogs.
 
-Students: open **Opportunities**, use the **Eligibility** filter, and open a job to see its requirements and your result for each one. **Details needed** means missing values or a school result format that cannot be compared with a percentage. Use the **Update academic details** link and enter your institution-reported values. Matching ignores branch-name letter case and extra spaces, but does not guess abbreviations or CGPA-to-percentage conversions. Academic records remain self-declared.
+Students: open **Opportunities**, use the **Eligibility** filter, and open a job to see its requirements and your result for each one. **Details needed** means missing values or a school result format that cannot be compared with a percentage. Use the **Update academic details** link and enter your institution-reported values. Matching ignores branch-name letter case and extra spaces, but does not guess abbreviations or CGPA-to-percentage conversions. Job eligibility uses saved academic values; campus review status is explained below.
 
 Compatibility and eligibility are separate. A high match score does not bypass a cutoff. Existing applications remain in their pipeline if requirements change later.
 
