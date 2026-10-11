@@ -117,3 +117,7 @@ See [email verification instructions](docs/EMAIL_VERIFICATION.md) for real deliv
 ## Test Forgot password
 
 Start with `powershell -ExecutionPolicy Bypass -File .\start-dev.ps1 -EmailTesting`. On sign-in choose **Forgot password?**, enter an existing account email, open the test inbox, and use its **Reset password** link. Set and confirm a new password, then sign in with it. The flow stays in the same tab; links expire after 30 minutes and work once. Earlier sessions are ended. See [password recovery instructions](docs/PASSWORD_RECOVERY.md), including behavior after restarting the backend.
+
+## Academic document review
+
+Students: save **My profile → Academic details**, then open **Academic documents** and upload 10th, 12th/diploma and college evidence. Select the files and submit for campus review. Placement officers: open **Academic reviews**, inspect the documents and approve or request corrections with a reason. Students receive feedback in their history and notifications. Changing reviewed academic details requires another review. See [the complete test walkthrough](docs/ACADEMIC_REVIEW.md).

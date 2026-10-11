@@ -7,6 +7,10 @@ public final class Inputs {
     public record VerifyEmail(@NotBlank @Pattern(regexp="[A-Za-z0-9_-]{43}") String token) {}
     public record ResetPassword(@NotBlank @Pattern(regexp="[A-Za-z0-9_-]{43}") String token,
         @NotBlank @Size(min=10,max=72) String newPassword,@NotBlank @Size(min=10,max=72) String confirmPassword) {}
+    public record SubmitAcademics(@NotNull @Size(min=3,max=8) List<@NotNull @Positive Long> documentIds,
+        @NotNull @Min(0) Long academicRevision,@Size(max=1000) String note) {}
+    public record ReviewAcademics(@NotNull @Min(0) Long version,@NotBlank @Pattern(regexp="VERIFIED|CHANGES_REQUESTED") String status,
+        @Size(max=2000) String note,@AssertTrue boolean documentsChecked) {}
     public record Login(@Email @NotBlank @Size(max=254) String email,@NotBlank @Size(max=72) String password) {}
     public record Register(@NotBlank @Size(max=80) String name,@Email @NotBlank @Size(max=254) String email,
         @NotBlank @Size(min=10,max=72) String password,@NotNull Model.Role role,Long universityId,@Size(max=100) String department,@Min(1960) @Max(2100) Integer graduationYear) {}

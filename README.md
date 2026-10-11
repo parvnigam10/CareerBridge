@@ -137,3 +137,6 @@ New student/recruiter registration requires confirmation with a single-use 24-ho
 
 ### Forgot password
 The sign-in page offers email-based password recovery with a single-use 30-minute reset link. It uses the existing local inbox or configured SMTP, preserves account data and ends previous login sessions. See [setup and testing](docs/PASSWORD_RECOVERY.md).
+
+### Academic document verification
+Students can submit supporting marksheets for campus review. Placement officers review their university's records, request corrections or approve the saved academic snapshot. Recruiters see review status; private files stay with the student and authorised staff. Academic edits require a new review. See [setup and testing](docs/ACADEMIC_REVIEW.md).

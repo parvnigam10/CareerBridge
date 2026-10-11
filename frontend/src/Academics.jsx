@@ -1,7 +1,11 @@
 import {useState} from 'react';
+import {Link} from 'react-router-dom';
 import {GraduationCap} from 'lucide-react';
 import {api} from './api';
 import {Badge,Button,Field,useToast} from './ui';
+
+export const academicStatusLabel=v=>({NOT_SUBMITTED:'Self-declared',PENDING:'Awaiting review',VERIFIED:'Campus verified',CHANGES_REQUESTED:'Corrections requested',NEEDS_RESUBMISSION:'Review needed again'}[v?.status]||'Self-declared');
+export function AcademicVerificationBadge({verification}){return <Badge tone={verification?.status==='VERIFIED'?'green':verification?.status==='CHANGES_REQUESTED'?'red':''}>{academicStatusLabel(verification)}</Badge>;}
 
 export function schoolResult(academics, prefix) {
   const a=academics||{}, type=a[`${prefix}ScoreType`], score=a[`${prefix}Score`];
@@ -46,7 +50,7 @@ export function AcademicForm({data,onSaved}) {
     try {await api('/student/academics',{method:'PUT',body});toast('Academic details saved');onSaved();}
     catch(e){setError(e.message);}finally{setBusy(false);}
   }
-  return <section className="panel academic-panel"><div className="panel-head"><h2><GraduationCap size={21}/> Academic details</h2><Badge>Self-declared</Badge></div>
+  return <section className="panel academic-panel"><div className="panel-head"><h2><GraduationCap size={21}/> Academic details</h2><AcademicVerificationBadge verification={data.academicVerification}/></div>
     <p className="muted small">Add your academic journey. You can save an incomplete profile and return later. Leave unknown results blank.</p>
     {data.university&&<p className="muted small">Registered university: {data.university.name}</p>}
     <form onSubmit={save}>
@@ -66,18 +70,19 @@ export function AcademicForm({data,onSaved}) {
         <Field label="Education gap (years)" name="gapYears" type="number" min={0} max={20} value={values.gapYears??''} onChange={change}/>
       </div></fieldset>
       {error&&<p className="academic-error" role="alert">{error}</p>}
-      <Button type="submit" busy={busy}>Save academic details</Button>
+      {data.academicVerification?.status==='VERIFIED'&&<p className="muted small">Changing academic details will require a new campus review.</p>}
+      <div className="row-actions"><Button type="submit" busy={busy}>Save academic details</Button><Link className="button secondary" to="/academic-documents">Supporting documents</Link></div>
     </form>
   </section>;
 }
 
-export function AcademicSummary({profile,user,compact=false}) {
+export function AcademicSummary({profile,user,verification,compact=false}) {
   const a=profile?.academics||{}, provided=value=>value==null||value===''?'Not provided':value;
-  if(compact)return <div className="academic-compact"><span>10th <strong>{schoolResult(a,'tenth')}</strong></span><span>{a.secondaryQualification==='DIPLOMA'?'Diploma':'12th / diploma'} <strong>{schoolResult(a,'secondary')}</strong></span><span>CGPA <strong>{profile?.cgpa==null?'Not provided':`${profile.cgpa} / 10`}</strong></span></div>;
+  if(compact)return <div className="academic-compact"><span>10th <strong>{schoolResult(a,'tenth')}</strong></span><span>{a.secondaryQualification==='DIPLOMA'?'Diploma':'12th / diploma'} <strong>{schoolResult(a,'secondary')}</strong></span><span>CGPA <strong>{profile?.cgpa==null?'Not provided':`${profile.cgpa} / 10`}</strong></span><AcademicVerificationBadge verification={verification}/></div>;
   const rows=[
     ['10th institution',a.tenthInstitution],['10th board',a.tenthBoard],['10th passing year',a.tenthYear],['10th result',schoolResult(a,'tenth')],
     ['Qualification',a.secondaryQualification==='DIPLOMA'?'Diploma':a.secondaryQualification==='TWELFTH'?'12th':null],['Secondary institution',a.secondaryInstitution],['Secondary board',a.secondaryBoard],['Secondary passing year',a.secondaryYear],['Secondary result',schoolResult(a,'secondary')],
     ['College',a.collegeInstitution],['Degree',a.degree],['Branch',user?.department],['Graduation year',user?.graduationYear],['Semester',a.currentSemester],['CGPA (out of 10)',profile?.cgpa],['Active backlogs',a.activeBacklogs],['Cleared backlogs',a.clearedBacklogs],['Gap years',a.gapYears]
   ];
-  return <section className="academic-review"><div className="panel-head"><h3>Academic record</h3><Badge>Self-declared</Badge></div><dl className="academic-facts">{rows.map(([title,value])=><div key={title}><dt>{title}</dt><dd>{provided(value)}</dd></div>)}</dl></section>;
+  return <section className="academic-review"><div className="panel-head"><h3>Academic record</h3><AcademicVerificationBadge verification={verification}/></div><dl className="academic-facts">{rows.map(([title,value])=><div key={title}><dt>{title}</dt><dd>{provided(value)}</dd></div>)}</dl></section>;
 }

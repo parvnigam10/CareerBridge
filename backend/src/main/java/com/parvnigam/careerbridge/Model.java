@@ -37,13 +37,14 @@ public final class Model {
     }
     @Entity @Table(name="universities")
     public static class University extends Base { public String name; public String city; }
-    @Entity @Table(name="student_profiles",uniqueConstraints=@UniqueConstraint(columnNames="userId"))
+    @Entity(name="StudentProfile") @Table(name="student_profiles",uniqueConstraints=@UniqueConstraint(columnNames="userId"))
     public static class Profile extends Base {
         public Long userId;
         public String headline="";
         @Column(length=4000) public String about="";
         public String city="";
         public Double cgpa;
+        public Long academicRevision; // Null is revision 0 for existing profiles.
         @Embedded public Academics academics;
         public Double experienceYears=0.0;
         public String preferredRole="Software Engineer";
@@ -64,6 +65,27 @@ public final class Model {
         public Double secondaryScore, secondaryScale;
         public String collegeInstitution, degree;
         public Integer currentSemester, activeBacklogs, clearedBacklogs, gapYears;
+    }
+    public enum AcademicDocumentKind { TENTH, SECONDARY, COLLEGE, OTHER }
+    public enum AcademicReviewStatus { PENDING, VERIFIED, CHANGES_REQUESTED }
+    @Entity(name="AcademicDocument") @Table(name="academic_documents")
+    public static class AcademicDocument extends Base {
+        public Long userId;
+        @Enumerated(EnumType.STRING) public AcademicDocumentKind kind;
+        public String filename, storageKey, mediaType;
+        public long sizeBytes;
+    }
+    @Entity(name="AcademicSubmission") @Table(name="academic_submissions")
+    public static class AcademicSubmission extends Base {
+        public Long studentId, universityId;
+        public long academicRevision;
+        @Column(length=20000) public String snapshotJson;
+        @Column(length=1000) public String studentNote;
+        @Enumerated(EnumType.STRING) public AcademicReviewStatus status=AcademicReviewStatus.PENDING;
+        @ElementCollection(fetch=FetchType.EAGER) public List<Long> documentIds=new ArrayList<>();
+        public Long reviewerId;
+        public Instant reviewedAt;
+        @Column(length=2000) public String reviewNote;
     }
     @Entity @Table(name="student_projects")
     public static class Project extends Base {

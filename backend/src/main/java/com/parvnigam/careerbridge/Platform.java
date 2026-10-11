@@ -13,7 +13,8 @@ import org.springframework.web.server.ResponseStatusException;
 public class Platform {
     final Store r;
     final NotificationService notifications;
-    public Platform(Store store,NotificationService notices) {r=store;notifications=notices;}
+    final AcademicReviewService academicReviews;final jakarta.persistence.EntityManager entityManager;
+    public Platform(Store store,NotificationService notices,AcademicReviewService academicReviews,jakarta.persistence.EntityManager entityManager) {r=store;notifications=notices;this.academicReviews=academicReviews;this.entityManager=entityManager;}
     static ResponseStatusException fail(int code,String message) {return new ResponseStatusException(HttpStatus.valueOf(code),message);}
     static String clean(String s) {return s==null?"":s.trim();}
     static List<String> skills(List<String> values) {return values==null?List.of():values.stream().map(Platform::clean).filter(x->!x.isEmpty()).distinct().toList();}
@@ -29,6 +30,7 @@ public class Platform {
     }
     Map<String,Object> user(Model.Account a) {return map("id",a.id,"name",a.name,"email",a.email,"role",a.role,"enabled",a.enabled,"emailVerified",Boolean.TRUE.equals(a.emailVerified),"emailVerificationStatus",a.emailVerified==null?"EXISTING_ACCOUNT":a.emailVerified?"VERIFIED":"PENDING","universityId",a.universityId,"department",a.department,"graduationYear",a.graduationYear);}
     Model.Profile profile(Long uid) {return r.profiles().findByUserId(uid).orElseThrow(()->fail(404,"Student profile not found"));}
+    Map<String,Object> academicReviewSummary(Model.Account a,Model.Profile p){return academicReviews.summary(a,p);}
     Model.Job job(Long id) {return r.jobs().findById(id).orElseThrow(()->fail(404,"Job not found"));}
     Model.Job ownJob(Model.Account a,Long id) {Model.Job j=job(id);if(!j.recruiterId.equals(a.id))throw fail(403,"This opening belongs to another recruiter");return j;}
     boolean canSee(Model.Account a,Model.Job j) {return j.universityId==null || a.role==Model.Role.ADMIN || a.role==Model.Role.RECRUITER || Objects.equals(a.universityId,j.universityId);}
@@ -64,7 +66,7 @@ public class Platform {
             .filter(j->clean(type).isEmpty()||j.employmentType.equals(type)).filter(j->clean(mode).isEmpty()||j.workMode.equals(mode))
             .sorted(Comparator.comparing((Model.Job j)->j.createdAt).reversed()).map(j->jobView(j,a)).toList();
     }
-    Map<String,Object> fullProfile(Model.Account a) {Model.Profile p=profile(a.id);return map("user",user(a),"university",a.universityId==null?null:r.universities().findById(a.universityId).orElse(null),"profile",p,"projects",r.projects().findByUserIdOrderByCreatedAtDesc(a.id),"education",r.educations().findByUserIdOrderByCreatedAtDesc(a.id),"experience",r.experiences().findByUserIdOrderByCreatedAtDesc(a.id),"completion",completion(p,a.id));}
+    Map<String,Object> fullProfile(Model.Account a) {Model.Profile p=profile(a.id);return map("user",user(a),"university",a.universityId==null?null:r.universities().findById(a.universityId).orElse(null),"profile",p,"academicVerification",academicReviews.summary(a,p),"projects",r.projects().findByUserIdOrderByCreatedAtDesc(a.id),"education",r.educations().findByUserIdOrderByCreatedAtDesc(a.id),"experience",r.experiences().findByUserIdOrderByCreatedAtDesc(a.id),"completion",completion(p,a.id));}
     int completion(Model.Profile p,Long id) {return (int)Stream.of(!p.headline.isBlank(),!p.about.isBlank(),!p.city.isBlank(),!p.skills.isEmpty(),p.cgpa!=null,
         schoolComplete(p.academics,true),schoolComplete(p.academics,false),
         p.academics!=null && !clean(p.academics.degree).isEmpty() && !clean(p.academics.collegeInstitution).isEmpty(),
@@ -75,8 +77,8 @@ public class Platform {
             && (tenth?a.tenthYear:a.secondaryYear)!=null && (tenth||a.secondaryQualification!=null) && !schoolResult(a,tenth).isEmpty();
     }
     void updateProfile(Model.Account a,Inputs.Profile d) {
-        Model.Profile p=profile(a.id);p.headline=clean(d.headline());p.about=clean(d.about());p.city=clean(d.city());p.cgpa=d.cgpa();p.experienceYears=d.experienceYears()==null?0:d.experienceYears();
-        p.preferredRole=clean(d.preferredRole());p.githubUsername=clean(d.githubUsername());p.leetcodeUsername=clean(d.leetcodeUsername());p.visibleToRecruiters=d.visibleToRecruiters();p.skills=new ArrayList<>(skills(d.skills()));r.profiles().save(p);
+        Model.Profile p=r.profiles().lockByUserId(a.id).orElseThrow();entityManager.refresh(p);String before=AcademicReviewService.snapshot(a,p);p.headline=clean(d.headline());p.about=clean(d.about());p.city=clean(d.city());p.cgpa=d.cgpa();p.experienceYears=d.experienceYears()==null?0:d.experienceYears();
+        p.preferredRole=clean(d.preferredRole());p.githubUsername=clean(d.githubUsername());p.leetcodeUsername=clean(d.leetcodeUsername());p.visibleToRecruiters=d.visibleToRecruiters();p.skills=new ArrayList<>(skills(d.skills()));AcademicReviewService.advanceIfChanged(p,before,AcademicReviewService.snapshot(a,p));r.profiles().save(p);
     }
     void updateAcademics(Model.Account a,Inputs.Academics d) {
         validateResult("10th",d.tenthScoreType(),d.tenthScore(),d.tenthScale(),d.tenthGrade());
@@ -91,8 +93,10 @@ public class Platform {
         x.tenthInstitution=clean(d.tenthInstitution());x.tenthBoard=clean(d.tenthBoard());x.tenthYear=d.tenthYear();x.tenthScoreType=d.tenthScoreType();x.tenthScore=d.tenthScore();x.tenthScale=d.tenthScale();x.tenthGrade=clean(d.tenthGrade());
         x.secondaryQualification=d.secondaryQualification();x.secondaryInstitution=clean(d.secondaryInstitution());x.secondaryBoard=clean(d.secondaryBoard());x.secondaryYear=d.secondaryYear();x.secondaryScoreType=d.secondaryScoreType();x.secondaryScore=d.secondaryScore();x.secondaryScale=d.secondaryScale();x.secondaryGrade=clean(d.secondaryGrade());
         x.collegeInstitution=clean(d.collegeInstitution());x.degree=clean(d.degree());x.currentSemester=d.currentSemester();x.activeBacklogs=d.activeBacklogs();x.clearedBacklogs=d.clearedBacklogs();x.gapYears=d.gapYears();
-        Model.Profile profile=profile(a.id);profile.academics=x;profile.cgpa=d.cgpa();
-        a.department=clean(d.department());a.graduationYear=d.graduationYear();r.accounts().save(a);r.profiles().save(profile);
+        a=r.accounts().lockAccount(a.id).orElseThrow();entityManager.refresh(a);
+        Model.Profile profile=r.profiles().lockByUserId(a.id).orElseThrow();entityManager.refresh(profile);String before=AcademicReviewService.snapshot(a,profile);
+        profile.academics=x;profile.cgpa=d.cgpa();
+        a.department=clean(d.department());a.graduationYear=d.graduationYear();AcademicReviewService.advanceIfChanged(profile,before,AcademicReviewService.snapshot(a,profile));r.accounts().save(a);r.profiles().save(profile);
     }
     static void validateResult(String section,String type,Double score,Double scale,String grade) {
         if(score!=null&&!Double.isFinite(score)||scale!=null&&!Double.isFinite(scale))throw fail(400,section+": enter a finite score and scale");
@@ -147,7 +151,7 @@ public class Platform {
         Model.Job j=jobId==null?null:ownJob(recruiter,jobId);
         return r.accounts().findAll().stream().filter(a->a.role==Model.Role.STUDENT&&a.enabled&&!Boolean.FALSE.equals(a.emailVerified)).filter(a->j==null||canSee(a,j)).filter(a->profile(a.id).visibleToRecruiters)
             .filter(a->(a.name+" "+String.join(" ",profile(a.id).skills)).toLowerCase().contains(clean(q).toLowerCase()))
-            .map(a->{Map<String,Object> v=map("user",map("id",a.id,"name",a.name,"department",a.department,"graduationYear",a.graduationYear),"profile",profile(a.id),"projects",r.projects().findByUserIdOrderByCreatedAtDesc(a.id));if(j!=null)v.put("match",match(a,profile(a.id),j));return v;}).toList();
+            .map(a->{Map<String,Object> v=map("user",map("id",a.id,"name",a.name,"department",a.department,"graduationYear",a.graduationYear),"profile",profile(a.id),"academicVerification",academicReviews.summary(a,profile(a.id)),"projects",r.projects().findByUserIdOrderByCreatedAtDesc(a.id));if(j!=null)v.put("match",match(a,profile(a.id),j));return v;}).toList();
     }
     List<Model.Account> scopedStudents(Model.Account actor,Integer year,String department) {return r.accounts().findAll().stream().filter(a->a.role==Model.Role.STUDENT&&a.enabled&&!Boolean.FALSE.equals(a.emailVerified))
         .filter(a->actor.role==Model.Role.ADMIN||Objects.equals(actor.universityId,a.universityId)).filter(a->year==null||Objects.equals(year,a.graduationYear))
@@ -158,7 +162,7 @@ public class Platform {
         Set<Long> placed=apps.stream().filter(a->a.status==Model.Stage.HIRED).map(a->a.studentId).collect(Collectors.toSet());
         Map<String,Long> stages=apps.stream().collect(Collectors.groupingBy(a->a.status.name(),Collectors.counting()));
         Map<String,Long> skillDemand=r.jobs().findAll().stream().filter(this::active).filter(j->j.universityId==null||Objects.equals(j.universityId,actor.universityId)||actor.role==Model.Role.ADMIN).flatMap(j->j.requiredSkills.stream()).collect(Collectors.groupingBy(x->x,Collectors.counting()));
-        List<Map<String,Object>> rows=students.stream().map(a->map("user",user(a),"profile",profile(a.id),"completion",completion(profile(a.id),a.id),"applications",apps.stream().filter(x->x.studentId.equals(a.id)).count(),"placed",placed.contains(a.id))).toList();
+        List<Map<String,Object>> rows=students.stream().map(a->map("user",user(a),"profile",profile(a.id),"academicVerification",academicReviews.summary(a,profile(a.id)),"completion",completion(profile(a.id),a.id),"applications",apps.stream().filter(x->x.studentId.equals(a.id)).count(),"placed",placed.contains(a.id))).toList();
         return map("students",rows,"totalStudents",students.size(),"placedStudents",placed.size(),"placementRate",students.isEmpty()?0:Math.round(placed.size()*1000.0/students.size())/10.0,"totalApplications",apps.size(),"stages",stages,"skillDemand",skillDemand);
     }
     List<Map<String,Object>> recommendations(Model.Account student) {return jobs(student,"","","",false).stream().sorted(Comparator.comparingDouble((Map<String,Object> j)->((Number)((Map<?,?>)j.get("match")).get("score")).doubleValue()).reversed()).toList();}

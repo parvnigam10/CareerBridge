@@ -94,7 +94,7 @@ A student may withdraw from Applied, Shortlisted or Interview. Stage changes rec
 
 School result formats are `PERCENTAGE` (0–100), `CGPA` (score no greater than the supplied positive scale, at most 10), or `GRADE` (text up to 30 characters). A score needs its format; a secondary record needs qualification `TWELFTH` or `DIPLOMA`. Incomplete records can be saved. Passing years must not be in the future or precede the previous qualification. College graduation can be a future year. College CGPA remains on the existing 10-point scale, without automatic percentage conversion.
 
-These records are self-declared. They appear in visible recruiter candidates, authorized application reviews, university-scoped placement views, and the placement CSV. Exported unknown values are blank and result formats retain their units. College CGPA and optional school, branch, year and backlog requirements drive eligibility as described below.
+These records start as self-declared and can receive a campus review status through [academic document review](ACADEMIC_REVIEW.md). They appear in visible recruiter candidates, authorized application reviews, university-scoped placement views, and the placement CSV. Exported unknown values are blank and result formats retain their units. College CGPA and optional school, branch, year and backlog requirements drive eligibility as described below.
 
 ## Job eligibility
 
@@ -111,3 +111,7 @@ Public registration returns `{verificationRequired:true,message:...}` with no JW
 ### Password recovery
 
 `POST /api/auth/forgot-password` accepts `{email:...}` and returns a generic 202 response with no token. `POST /api/auth/reset-password` accepts `{token:...,newPassword:...,confirmPassword:...}` and returns a message with no JWT. A valid reset consumes the 30-minute link and ends previous sessions. Email verification remains a separate requirement. See [configuration and limits](PASSWORD_RECOVERY.md).
+
+### Academic evidence and review
+
+Student upload/history uses `/student/academic-documents`; multipart upload fields are `kind` (TENTH, SECONDARY, COLLEGE or OTHER) and `file`. Submit saved details via `POST /student/academic-submissions` with document IDs, the current academic revision and an optional note. Campus staff use `/placement/academic-reviews` to view and decide submissions with a version, VERIFIED/CHANGES_REQUESTED decision, note and `documentsChecked:true`. Download supporting evidence at `/academic-documents/{id}/download` with the owner or staff session; recruiter sessions are denied. Academic changes invalidate the current review status. Profile/candidate/campus responses add `academicVerification`. See [full rules and payloads](ACADEMIC_REVIEW.md).
