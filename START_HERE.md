@@ -95,7 +95,7 @@ After merging the academic profile pull request, stop both development servers, 
 
 Sign in as a student and open **My profile → Academic details**. Add 10th, 12th or diploma, college, semester, backlog and gap information, then select **Save academic details**. Fields can be left blank. The general education list is retained for additional qualifications. College CGPA has moved into the academic section and remains on a 10-point scale. School results keep their original percentage, CGPA scale, or letter grade.
 
-Recruiters can see school results in candidate cards and complete records in application reviews. Placement officers can open **View academics** in their student table and export the extended CSV. Records are self-declared; document verification is a future change. Job eligibility rules are described below.
+Recruiters can see school results in candidate cards and complete records in application reviews. Placement officers can open **View academics** in their student table and export the extended CSV. Records start as self-declared and can receive campus approval through **Academic document review** below. Job eligibility rules are described below.
 
 ## Job eligibility update
 
@@ -103,7 +103,7 @@ After merging the eligibility pull request, stop both servers, back up `backend/
 
 Recruiters: open **Your openings → New opening / Edit → Who can apply**. Enter school percentage cutoffs, college CGPA, branch/year lists and a maximum active backlog count. Leave optional rules blank to allow everyone; a backlog limit of 0 means no active backlogs.
 
-Students: open **Opportunities**, use the **Eligibility** filter, and open a job to see its requirements and your result for each one. **Details needed** means missing values or a school result format that cannot be compared with a percentage. Use the **Update academic details** link and enter your institution-reported values. Matching ignores branch-name letter case and extra spaces, but does not guess abbreviations or CGPA-to-percentage conversions. Academic records remain self-declared.
+Students: open **Opportunities**, use the **Eligibility** filter, and open a job to see its requirements and your result for each one. **Details needed** means missing values or a school result format that cannot be compared with a percentage. Use the **Update academic details** link and enter your institution-reported values. Matching ignores branch-name letter case and extra spaces, but does not guess abbreviations or CGPA-to-percentage conversions. Job eligibility uses saved academic values; campus review status is explained below.
 
 Compatibility and eligibility are separate. A high match score does not bypass a cutoff. Existing applications remain in their pipeline if requirements change later.
 
@@ -117,3 +117,7 @@ See [email verification instructions](docs/EMAIL_VERIFICATION.md) for real deliv
 ## Test Forgot password
 
 Start with `powershell -ExecutionPolicy Bypass -File .\start-dev.ps1 -EmailTesting`. On sign-in choose **Forgot password?**, enter an existing account email, open the test inbox, and use its **Reset password** link. Set and confirm a new password, then sign in with it. The flow stays in the same tab; links expire after 30 minutes and work once. Earlier sessions are ended. See [password recovery instructions](docs/PASSWORD_RECOVERY.md), including behavior after restarting the backend.
+
+## Academic document review
+
+Students: save **My profile → Academic details**, then open **Academic documents** and upload 10th, 12th/diploma and college evidence. Select the files and submit for campus review. Placement officers: open **Academic reviews**, inspect the documents and approve or request corrections with a reason. Students receive feedback in their history and notifications. Changing reviewed academic details requires another review. See [the complete test walkthrough](docs/ACADEMIC_REVIEW.md).

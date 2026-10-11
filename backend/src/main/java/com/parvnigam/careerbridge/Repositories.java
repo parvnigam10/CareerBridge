@@ -15,7 +15,23 @@ public final class Repositories {
         @org.springframework.data.jpa.repository.Query("select a from Account a where a.id = :id")
         Optional<Model.Account> lockAccount(@org.springframework.data.repository.query.Param("id") Long id); }
     public interface Universities extends JpaRepository<Model.University,Long> {}
-    public interface Profiles extends JpaRepository<Model.Profile,Long> { Optional<Model.Profile> findByUserId(Long id); }
+    public interface Profiles extends JpaRepository<Model.Profile,Long> { Optional<Model.Profile> findByUserId(Long id);
+        @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+        @org.springframework.data.jpa.repository.Query("select p from StudentProfile p where p.userId = :id")
+        Optional<Model.Profile> lockByUserId(@org.springframework.data.repository.query.Param("id") Long id); }
+    public interface AcademicDocuments extends JpaRepository<Model.AcademicDocument,Long> { List<Model.AcademicDocument> findByUserIdOrderByIdDesc(Long id); }
+    public interface AcademicSubmissions extends JpaRepository<Model.AcademicSubmission,Long> {
+        List<Model.AcademicSubmission> findByStudentIdOrderByIdDesc(Long id);
+        List<Model.AcademicSubmission> findByUniversityIdOrderByIdDesc(Long id);
+        List<Model.AcademicSubmission> findAllByOrderByIdDesc();
+        @org.springframework.data.jpa.repository.Query("select s.studentId from AcademicSubmission s where s.id = :id")
+        Optional<Long> studentId(@org.springframework.data.repository.query.Param("id") Long id);
+        @org.springframework.data.jpa.repository.Query("select count(s) from AcademicSubmission s join s.documentIds d where d = :id")
+        long documentReferences(@org.springframework.data.repository.query.Param("id") Long id);
+        @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+        @org.springframework.data.jpa.repository.Query("select s from AcademicSubmission s where s.id = :id")
+        Optional<Model.AcademicSubmission> lockSubmission(@org.springframework.data.repository.query.Param("id") Long id);
+    }
     public interface Projects extends JpaRepository<Model.Project,Long> { List<Model.Project> findByUserIdOrderByCreatedAtDesc(Long id); }
     public interface Educations extends JpaRepository<Model.Education,Long> { List<Model.Education> findByUserIdOrderByCreatedAtDesc(Long id); }
     public interface Experiences extends JpaRepository<Model.Experience,Long> { List<Model.Experience> findByUserIdOrderByCreatedAtDesc(Long id); }
