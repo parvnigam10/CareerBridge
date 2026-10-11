@@ -113,3 +113,7 @@ Start with `powershell -ExecutionPolicy Bypass -File .\start-dev.ps1 -EmailTesti
 Register a new account, open http://127.0.0.1:8025, click its verification link, confirm, then sign in.
 Existing accounts keep working. New registration requires the local testing option or configured SMTP.
 See [email verification instructions](docs/EMAIL_VERIFICATION.md) for real delivery and limits.
+
+## Test Forgot password
+
+Start with `powershell -ExecutionPolicy Bypass -File .\start-dev.ps1 -EmailTesting`. On sign-in choose **Forgot password?**, enter an existing account email, open the test inbox, and use its **Reset password** link. Set and confirm a new password, then sign in with it. The flow stays in the same tab; links expire after 30 minutes and work once. Earlier sessions are ended. See [password recovery instructions](docs/PASSWORD_RECOVERY.md), including behavior after restarting the backend.

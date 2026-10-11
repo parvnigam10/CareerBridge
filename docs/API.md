@@ -107,3 +107,7 @@ The same assessment controls student application submission and recruiter invita
 ### Email confirmation
 
 Public registration returns `{verificationRequired:true,message:...}` with no JWT. Confirm via `POST /api/auth/verify-email` with `{token:...}`. Request another link through `POST /api/auth/resend-verification` with `{email:...}`. New pending accounts cannot log in or access protected features. Existing accounts keep access; `/api/auth/me` exposes VERIFIED/PENDING/EXISTING_ACCOUNT. See EMAIL_VERIFICATION.md for configuration and legacy policy.
+
+### Password recovery
+
+`POST /api/auth/forgot-password` accepts `{email:...}` and returns a generic 202 response with no token. `POST /api/auth/reset-password` accepts `{token:...,newPassword:...,confirmPassword:...}` and returns a message with no JWT. A valid reset consumes the 30-minute link and ends previous sessions. Email verification remains a separate requirement. See [configuration and limits](PASSWORD_RECOVERY.md).

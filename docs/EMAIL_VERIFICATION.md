@@ -34,7 +34,7 @@ Without local testing or SMTP, new registration fails with an explanatory 503 an
 
 ## Existing data
 
-Existing accounts, including demo and administrator-provisioned accounts, retain access and display EXISTING_ACCOUNT rather than VERIFIED. Their new emailVerified column is null; no proof of inbox access is claimed. New public registrations are false until confirmed. This staged compatibility policy prevents locking existing users out. Retiring demo access, requiring proof for legacy accounts, password recovery, recruiter approval and university membership checks are separate updates. This update does not claim those are complete.
+Existing accounts, including demo and administrator-provisioned accounts, retain access and display EXISTING_ACCOUNT rather than VERIFIED. Their new emailVerified column is null; no proof of inbox access is claimed. New public registrations are false until confirmed. This staged compatibility policy prevents locking existing users out. Password recovery is available through [Forgot password](PASSWORD_RECOVERY.md) and does not confirm email ownership for the verification policy. Retiring demo access, requiring proof for legacy accounts, recruiter approval and university membership checks remain separate updates.
 
 ## API
 

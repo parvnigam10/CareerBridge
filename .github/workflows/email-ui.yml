@@ -1,8 +1,12 @@
-name: Email verification browser checks
+name: Account recovery browser checks
 on:
   pull_request:
     paths:
       - 'frontend/src/VerifyEmailPage.jsx'
+      - 'frontend/src/PasswordRecoveryPages.jsx'
+      - 'frontend/src/PublicPages.jsx'
+      - 'frontend/src/App.jsx'
+      - 'backend/src/main/java/com/parvnigam/careerbridge/PasswordRecovery.java'
       - 'frontend/src/style.css'
       - 'frontend/tests/email-ui-smoke.cjs'
       - 'backend/src/main/java/com/parvnigam/careerbridge/VerificationMail.java'
