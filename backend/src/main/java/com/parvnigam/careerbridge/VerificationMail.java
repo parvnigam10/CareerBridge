@@ -59,7 +59,7 @@ public class VerificationMail {
             a{color:#173c34;text-decoration:none}a:focus-visible{outline:3px solid #ec8356;outline-offset:4px}
             .inbox-shell{max-width:900px;margin:0 auto;padding:32px 24px 40px}
             .inbox-header{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:44px}
-            .brand{font-size:23px;font-weight:750;letter-spacing:-1px}.brand span{color:#bd6039}
+            .brand{display:inline-flex;align-items:center;gap:10px;color:#173c34;font-size:23px;font-weight:700;letter-spacing:-1.1px;line-height:1;flex-shrink:0}.brand-symbol{width:41px;height:41px;display:block;flex-shrink:0;border-radius:11px}.brand small{display:block;color:inherit;font-size:6.2px;font-weight:500;letter-spacing:1.35px;margin-top:7px}
             .mode{padding:5px 9px;border-radius:6px;background:#e7ede5;color:#355246;font-size:10px;font-weight:700;letter-spacing:1px;white-space:nowrap}
             .inbox-title{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:24px}
             h1{font-size:32px;line-height:1.25;letter-spacing:-1px;margin:0 0 10px}h2{font-size:20px;line-height:1.4;margin:16px 0 8px}
@@ -73,11 +73,16 @@ public class VerificationMail {
             .message-copy{font-size:14px;color:#65736b;max-width:600px}.message-footer{display:flex;align-items:center;justify-content:space-between;gap:20px;border-top:1px solid #edf0e8;padding-top:20px;margin-top:22px}
             .message-footer small{font-size:12px;color:#74807b}.empty{background:#fff;border:1px solid #e3e6dd;border-radius:14px;padding:40px 26px;text-align:center}.empty h2{margin-top:0}.empty p{color:#65736b;font-size:14px}
             .inbox-footer{font-size:12px;color:#74807b;text-align:center;margin:26px 0 0}.message.earlier .message-meta span:first-child{background:#f2f2ef;color:#74807b}
-            @media(max-width:600px){.inbox-shell{padding:24px 16px}.inbox-header{margin-bottom:30px}.brand{font-size:21px}.inbox-title{align-items:flex-start;flex-direction:column;gap:14px}h1{font-size:28px}.actions{width:100%;grid-template-columns:1fr 1fr;flex:none}.message{padding:22px 20px}.message-footer{align-items:stretch;flex-direction:column;gap:12px}.message-footer .button{width:100%}.message-meta{align-items:flex-start}.message-meta span:last-child{text-align:right}.empty{padding:30px 20px}}
+            @media(max-width:600px){.inbox-shell{padding:24px 16px}.inbox-header{margin-bottom:30px}.brand{font-size:20px;gap:8px}.brand-symbol{width:34px;height:34px}.brand small{font-size:5.4px;letter-spacing:1px}.inbox-title{align-items:flex-start;flex-direction:column;gap:14px}h1{font-size:28px}.actions{width:100%;grid-template-columns:1fr 1fr;flex:none}.message{padding:22px 20px}.message-footer{align-items:stretch;flex-direction:column;gap:12px}.message-footer .button{width:100%}.message-meta{align-items:flex-start}.message-meta span:last-child{text-align:right}.empty{padding:30px 20px}}
+            @media(max-width:380px){.inbox-header{gap:12px}.brand{font-size:18px;gap:7px}.brand-symbol{width:30px;height:30px}.brand small{font-size:4.8px;letter-spacing:.9px}.mode{font-size:9px;letter-spacing:.6px;padding:5px 7px}}
             </style></head><body><main class="inbox-shell"><header class="inbox-header">
             """);
-        page.append("<a class=\"brand\" href=\"");
-        page.append(escape(frontend)).append("\" target=\"_self\">career<span>bridge</span></a><span class=\"mode\">LOCAL TESTING</span></header>");
+        page.append("<a class=\"brand\" aria-label=\"CareerBridge home\" href=\"");
+        // Embed the app's vector icon so the inbox header also works without the frontend server.
+        page.append(escape(frontend)).append("\" target=\"_self\">").append("""
+            <svg class="brand-symbol" width="41" height="41" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><rect width="96" height="96" rx="25" fill="#ed895e"/><g transform="translate(9 9) scale(1.21875)" fill="#173c34"><path d="M51 16C40 5 20 8 12 25C8 34 9 42 13 48C18 36 29 26 41 24C46 23 49 21 51 16Z"/><path d="M15 50C24 31 45 31 54 47H40C35 36 27 39 26 53Z"/></g></svg>
+            <span class="brand-wordmark">careerbridge<small>PREPARE. CONNECT. GROW.</small></span></a><span class="mode">LOCAL TESTING</span></header>
+            """);
         page.append("<section class=\"inbox-title\"><div><h1>Your test inbox</h1><p class=\"intro\">CareerBridge test messages arrive here. Nothing is sent to a real email account.</p></div><nav class=\"actions\" aria-label=\"Inbox actions\"><a class=\"button secondary\" href=\"\" target=\"_self\">Refresh inbox</a><a class=\"button secondary\" href=\"").append(escape(returnUrl)).append("\" target=\"_self\">").append(resetting?"Back to password recovery":"Back to verification").append("</a></nav></section>");
         if(!filter.isEmpty())page.append("<p class=\"filter-note\">Messages for <strong>").append(escape(filter)).append("</strong><a href=\"").append(resetting?"/?flow=reset":"/").append("\" target=\"_self\">Show all</a></p>");
         List<Message> visible;
