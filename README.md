@@ -134,3 +134,6 @@ See [docs/API.md](docs/API.md), [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) and
 
 ### Email verification
 New student/recruiter registration requires confirmation with a single-use 24-hour email link. Test locally without extra installation using `start-dev.ps1 -EmailTesting` and the loopback inbox at http://127.0.0.1:8025. Configure SMTP for real email delivery. Existing accounts retain access under an explicit compatibility policy. See [setup and behavior](docs/EMAIL_VERIFICATION.md).
+
+### Forgot password
+The sign-in page offers email-based password recovery with a single-use 30-minute reset link. It uses the existing local inbox or configured SMTP, preserves account data and ends previous login sessions. See [setup and testing](docs/PASSWORD_RECOVERY.md).

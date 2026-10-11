@@ -42,7 +42,7 @@ public class SecurityConfig {
         });
         return http.csrf(csrf->csrf.disable()).cors(cors->{})
             .sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(a->a.requestMatchers("/api/auth/login","/api/auth/register","/api/auth/verify-email","/api/auth/resend-verification","/api/public/**","/actuator/health","/error").permitAll()
+            .authorizeHttpRequests(a->a.requestMatchers("/api/auth/login","/api/auth/register","/api/auth/verify-email","/api/auth/resend-verification","/api/auth/forgot-password","/api/auth/reset-password","/api/public/**","/actuator/health","/error").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/placement/**").hasAnyRole("PLACEMENT_OFFICER","ADMIN")
                 .requestMatchers("/api/recruiter/**").hasRole("RECRUITER")

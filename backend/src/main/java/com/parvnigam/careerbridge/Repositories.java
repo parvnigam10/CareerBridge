@@ -7,6 +7,8 @@ public final class Repositories {
     public interface Accounts extends JpaRepository<Model.Account,Long> { Optional<Model.Account> findByEmail(String email);
         @org.springframework.data.jpa.repository.Query("select a.id from Account a where a.verificationHash = :hash")
         Optional<Long> verificationAccountId(@org.springframework.data.repository.query.Param("hash") String hash);
+        @org.springframework.data.jpa.repository.Query("select a.id from Account a where a.passwordResetHash = :hash")
+        Optional<Long> passwordResetAccountId(@org.springframework.data.repository.query.Param("hash") String hash);
         @org.springframework.data.jpa.repository.Query("select a.id from Account a where a.email = :email")
         Optional<Long> emailAccountId(@org.springframework.data.repository.query.Param("email") String email);
         @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)

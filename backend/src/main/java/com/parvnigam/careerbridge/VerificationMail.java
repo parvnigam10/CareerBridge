@@ -14,7 +14,8 @@ import org.springframework.stereotype.Service;
 /** Opt-in development inbox; no messages or tokens are exposed through the application API. */
 @Service
 public class VerificationMail {
-    record Message(String to,String link,long hours,Instant receivedAt) {}
+    enum Kind { VERIFICATION, PASSWORD_RESET }
+    record Message(String to,String link,long minutes,Instant receivedAt,Kind kind) {}
     final List<Message> messages=new ArrayList<>();
     final JavaMailSender sender;
     final boolean local,enabled;
@@ -32,10 +33,10 @@ public class VerificationMail {
                 boolean allowed=host!=null&&(host.equals("localhost:"+inbox.getAddress().getPort())||host.equals("127.0.0.1:"+inbox.getAddress().getPort()));
                 if(!allowed||!exchange.getRequestMethod().equals("GET")){exchange.sendResponseHeaders(403,-1);exchange.close();return;}
                 if(!exchange.getRequestURI().getPath().equals("/")){exchange.sendResponseHeaders(404,-1);exchange.close();return;}
-                String filter="";
-                try{String query=exchange.getRequestURI().getRawQuery();if(query!=null)for(String part:query.split("&")){String[] pair=part.split("=",2);if(pair[0].equals("email")&&pair.length==2){filter=URLDecoder.decode(pair[1],StandardCharsets.UTF_8).trim();break;}}}
+                String filter="",flow="verification";
+                try{String query=exchange.getRequestURI().getRawQuery();if(query!=null)for(String part:query.split("&")){String[] pair=part.split("=",2);if(pair.length==2){if(pair[0].equals("email"))filter=URLDecoder.decode(pair[1],StandardCharsets.UTF_8).trim();if(pair[0].equals("flow")&&pair[1].equals("reset"))flow="reset";}}}
                 catch(IllegalArgumentException e){exchange.sendResponseHeaders(400,-1);exchange.close();return;}
-                byte[] body=renderInbox(filter).getBytes(StandardCharsets.UTF_8);
+                byte[] body=renderInbox(filter,flow).getBytes(StandardCharsets.UTF_8);
                 exchange.getResponseHeaders().set("Content-Type","text/html; charset=utf-8");
                 exchange.getResponseHeaders().set("Cache-Control","no-store");
                 exchange.getResponseHeaders().set("Referrer-Policy","no-referrer");
@@ -47,8 +48,10 @@ public class VerificationMail {
         }
     }
 
-    String renderInbox(String filter){
-        String returnUrl=frontend+"/verify-email"+(filter.isEmpty()?"":"?email="+URLEncoder.encode(filter,StandardCharsets.UTF_8));
+    String renderInbox(String filter){return renderInbox(filter,"verification");}
+    String renderInbox(String filter,String flow){
+        boolean resetting=flow.equals("reset");
+        String returnUrl=frontend+(resetting?"/forgot-password":"/verify-email")+(filter.isEmpty()?"":"?email="+URLEncoder.encode(filter,StandardCharsets.UTF_8));
         StringBuilder page=new StringBuilder("""
             <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
             <title>Test inbox · CareerBridge</title><style>
@@ -75,29 +78,37 @@ public class VerificationMail {
             """);
         page.append("<a class=\"brand\" href=\"");
         page.append(escape(frontend)).append("\" target=\"_self\">career<span>bridge</span></a><span class=\"mode\">LOCAL TESTING</span></header>");
-        page.append("<section class=\"inbox-title\"><div><h1>Your test inbox</h1><p class=\"intro\">CareerBridge test messages arrive here. Nothing is sent to a real email account.</p></div><nav class=\"actions\" aria-label=\"Inbox actions\"><a class=\"button secondary\" href=\"\" target=\"_self\">Refresh inbox</a><a class=\"button secondary\" href=\"").append(escape(returnUrl)).append("\" target=\"_self\">Back to verification</a></nav></section>");
-        if(!filter.isEmpty())page.append("<p class=\"filter-note\">Messages for <strong>").append(escape(filter)).append("</strong><a href=\"/\" target=\"_self\">Show all</a></p>");
+        page.append("<section class=\"inbox-title\"><div><h1>Your test inbox</h1><p class=\"intro\">CareerBridge test messages arrive here. Nothing is sent to a real email account.</p></div><nav class=\"actions\" aria-label=\"Inbox actions\"><a class=\"button secondary\" href=\"\" target=\"_self\">Refresh inbox</a><a class=\"button secondary\" href=\"").append(escape(returnUrl)).append("\" target=\"_self\">").append(resetting?"Back to password recovery":"Back to verification").append("</a></nav></section>");
+        if(!filter.isEmpty())page.append("<p class=\"filter-note\">Messages for <strong>").append(escape(filter)).append("</strong><a href=\"").append(resetting?"/?flow=reset":"/").append("\" target=\"_self\">Show all</a></p>");
         List<Message> visible;
         synchronized(messages){visible=new ArrayList<>(messages);}
         if(!filter.isEmpty())visible.removeIf(m->!m.to().equalsIgnoreCase(filter));
+        if(resetting)visible.removeIf(m->m.kind()!=Kind.PASSWORD_RESET);
         Collections.reverse(visible);
-        if(visible.isEmpty())page.append("<section class=\"empty\"><h2>No messages yet</h2><p>Register a new account or request another verification email, then refresh this inbox.</p><a class=\"button\" target=\"_self\" href=\"").append(escape(returnUrl)).append("\">Back to CareerBridge</a></section>");
+        if(visible.isEmpty())page.append("<section class=\"empty\"><h2>No messages yet</h2><p>Register a new account or request another email, then refresh this inbox.</p><a class=\"button\" target=\"_self\" href=\"").append(escape(returnUrl)).append("\">Back to CareerBridge</a></section>");
         Set<String> seen=new HashSet<>();
         for(Message m:visible){
-            boolean latest=seen.add(m.to().toLowerCase(Locale.ROOT));
+            boolean latest=seen.add(m.to().toLowerCase(Locale.ROOT)+":"+m.kind());
             long minutes=Math.max(0,Duration.between(m.receivedAt(),Instant.now()).toMinutes());
             String received=minutes==0?"Just now":minutes<60?minutes+" min ago":minutes<1440?(minutes/60)+" hr ago":(minutes/1440)+" days ago";
-            page.append("<article class=\"message ").append(latest?"latest":"earlier").append("\"><div class=\"message-meta\"><span>").append(latest?"Latest email":"Earlier email").append("</span><span>").append(received).append("</span></div><p class=\"recipient\">To: <strong>").append(escape(m.to())).append("</strong></p><h2>Verify your CareerBridge email</h2><p class=\"message-copy\">").append(latest?"Confirm your email address to finish setting up your account.":"A newer email has been sent to this address. This earlier link may no longer work.").append("</p><div class=\"message-footer\"><small>Single-use link · Expires after ").append(m.hours()).append(" hours</small><a class=\"button\" href=\"").append(escape(m.link())).append("\" target=\"_self\" rel=\"noreferrer\">Verify email →</a></div></article>");
+            boolean reset=m.kind()==Kind.PASSWORD_RESET;
+            String duration=m.minutes()%60==0?(m.minutes()/60)+" hours":m.minutes()+" minutes";
+            page.append("<article class=\"message ").append(latest?"latest":"earlier").append("\"><div class=\"message-meta\"><span>").append(latest?"Latest email":"Earlier email").append("</span><span>").append(received).append("</span></div><p class=\"recipient\">To: <strong>").append(escape(m.to())).append("</strong></p><h2>").append(reset?"Reset your CareerBridge password":"Verify your CareerBridge email").append("</h2><p class=\"message-copy\">").append(!latest?"A newer email of this type has been sent. This earlier link may no longer work.":reset?"Choose a new password. If you did not request this, ignore this message.":"Confirm your email address to finish setting up your account.").append("</p><div class=\"message-footer\"><small>Single-use link · Expires after ").append(duration).append("</small><a class=\"button\" href=\"").append(escape(m.link())).append("\" target=\"_self\" rel=\"noreferrer\">").append(reset?"Reset password →":"Verify email →").append("</a></div></article>");
         }
-        return page.append("<p class=\"inbox-footer\">Messages stay on this computer and clear when the backend stops.<br>Verification continues in the same tab.</p></main></body></html>").toString();
+        return page.append("<p class=\"inbox-footer\">Messages stay on this computer and clear when the backend stops.<br>Continue in the same tab.</p></main></body></html>").toString();
     }
 
     static String escape(String s){return s.replace("&","&amp;").replace("<","&lt;").replace(">","&gt;").replace("\"","&quot;").replace("'","&#39;");}
-    void send(String to,String link,long hours){
-        if(local){synchronized(messages){if(messages.size()>=200)messages.remove(0);messages.add(new Message(to,link,hours,Instant.now()));}return;}
-        if(!enabled)throw Platform.fail(503,"Email delivery is not configured. Start local email testing or configure SMTP before registering.");
-        try{SimpleMailMessage m=new SimpleMailMessage();m.setFrom(from);m.setTo(to);m.setSubject("Verify your CareerBridge email");m.setText("Confirm your email address using the link below. It expires in "+hours+" hours and works once.\n\n"+link+"\n\nIf you did not register, ignore this email.");sender.send(m);}
-        catch(Exception e){throw Platform.fail(503,"Verification email could not be sent. Please try again later.");}
+    void requireDelivery(){if(!local&&!enabled)throw Platform.fail(503,"Email delivery is not configured. Start local email testing or configure SMTP first.");}
+    void send(String to,String link,long hours){sendLink(to,link,hours*60,Kind.VERIFICATION);}
+    void sendReset(String to,String link){sendLink(to,link,30,Kind.PASSWORD_RESET);}
+    private void sendLink(String to,String link,long minutes,Kind kind){
+        requireDelivery();
+        if(local){synchronized(messages){if(messages.size()>=200)messages.remove(0);messages.add(new Message(to,link,minutes,Instant.now(),kind));}return;}
+        boolean reset=kind==Kind.PASSWORD_RESET;
+        String duration=minutes%60==0?(minutes/60)+" hours":minutes+" minutes";
+        try{SimpleMailMessage m=new SimpleMailMessage();m.setFrom(from);m.setTo(to);m.setSubject(reset?"Reset your CareerBridge password":"Verify your CareerBridge email");m.setText((reset?"Choose a new CareerBridge password":"Confirm your email address")+" using the link below. It expires in "+duration+" and works once.\n\n"+link+"\n\nIf you did not request this, ignore this email.");sender.send(m);}
+        catch(Exception e){throw Platform.fail(503,"The email could not be sent. Please try again later.");}
     }
     @PreDestroy void close(){if(inbox!=null)inbox.stop(0);}
 }

@@ -28,6 +28,9 @@ public final class Model {
         @Column(unique=true,length=64) public String verificationHash;
         public Instant verificationExpiresAt;
         public Instant verificationSentAt;
+        @Column(unique=true,length=64) public String passwordResetHash;
+        public Instant passwordResetExpiresAt;
+        public Instant passwordResetSentAt;
         public Long universityId;
         public String department="Computer Science";
         public Integer graduationYear=2028;

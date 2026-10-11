@@ -100,3 +100,11 @@ These checks ran on Linux with Java 17 and Node.js 24. A Windows host, a live Po
 - Frontend production build passed.
 - Seven JUnit verification tests were added, and registration helpers in existing suites now confirm their test emails. The complete Maven/JUnit suite has not been run in this environment: the Maven repository is unreachable. Browser binaries are unavailable, so browser interaction and Windows launcher execution are not claimed as tested.
 - Real SMTP delivery has not been tested. The local capture inbox verifies application behavior only. GitHub CI remains to be run after publishing authorization.
+
+## Password recovery update — 11 October 2026
+
+- Backend source compilation and frontend production build passed locally. Eight password recovery HTTP scenarios passed using a local runner against the compiled Spring application and an isolated H2 database. The full Maven/JUnit suite is also run by GitHub Actions.
+- Coverage includes token hashing, expiry/replacement/cooldown, generic responses, mismatched/weak/unchanged passwords, UTF-8 BCrypt limits, purpose separation from verification, pending/disabled accounts, profile preservation, session revocation, account-setting password changes and concurrent single-use consumption.
+- The browser check now covers Forgot password, filtered reset inbox, return navigation, matching passwords, reset success, old-session/old-password rejection, link reuse and desktop/mobile overflow, alongside the existing verification flow. GitHub Actions uploads screenshots/results.
+- Compatibility: upgrading a copy of the previous persistent H2 database preserved every original column value across 21 tables. The previous 33-check email verification harness also passed; unconfigured recovery uniformly returned 503 for known and unknown addresses.
+- Live SMTP delivery, a Windows host and a live PostgreSQL instance were not exercised for this update.
