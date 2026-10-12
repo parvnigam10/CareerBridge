@@ -4,6 +4,6 @@ import org.springframework.stereotype.Component;
 public record Store(Repositories.Accounts accounts,Repositories.Universities universities,
     Repositories.Profiles profiles,Repositories.AcademicDocuments academicDocuments,Repositories.AcademicSubmissions academicSubmissions,Repositories.Projects projects,Repositories.Educations educations,
     Repositories.Experiences experiences,Repositories.Companies companies,Repositories.Jobs jobs,
-    Repositories.Applications applications,Repositories.ApplicationEvents events,Repositories.SavedJobs saves,
+    Repositories.Applications applications,Repositories.CampusDrives drives,Repositories.DriveRounds driveRounds,Repositories.DriveRegistrations driveRegistrations,Repositories.DriveResults driveResults,Repositories.ApplicationEvents events,Repositories.SavedJobs saves,
     Repositories.Resumes resumes,Repositories.Notices notices,Repositories.Interviews interviews,
     Repositories.Mocks mocks,Repositories.Audits audits) {}

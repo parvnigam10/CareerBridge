@@ -121,3 +121,7 @@ Start with `powershell -ExecutionPolicy Bypass -File .\start-dev.ps1 -EmailTesti
 ## Academic document review
 
 Students: save **My profile → Academic details**, then open **Academic documents** and upload 10th, 12th/diploma and college evidence. Select the files and submit for campus review. Placement officers: open **Academic reviews**, inspect the documents and approve or request corrections with a reason. Students receive feedback in their history and notifications. Changing reviewed academic details requires another review. See [the complete test walkthrough](docs/ACADEMIC_REVIEW.md).
+
+## University staff and campus drives
+
+Admin: use **Accounts → Create placement officer** and assign the officer's university. Students: Academic documents now has separate 10th, 12th/diploma and college upload areas. Campus staff: **Campus drives** creates a university recruitment event around an existing recruiter opening; **Campus openings** still browses recruiter listings. Students can register during the event window, reusing an existing job application. Officers track attendance and campus outcomes after each scheduled round starts; recruiters retain hiring decisions in their pipeline. See [update and complete test steps](docs/CAMPUS_DRIVES.md).

@@ -132,8 +132,9 @@ public class Platform {
         v.put("eligibility",Eligibility.assess(student,profile(student.id),j));if(viewer.role!=Model.Role.STUDENT)v.put("profile",fullProfile(student));return v;
     }
     Model.Application apply(Model.Account a,Inputs.Apply d) {
-        Model.Job j=job(d.jobId());if(!active(j))throw fail(400,"This opening is closed");if(!canSee(a,j))throw fail(403,"This opening is for another university");
-        Model.Profile p=profile(a.id);Map<String,Object> m=match(a,p,j);Eligibility.Report eligibility=(Eligibility.Report)m.get("eligibility");if(!eligibility.eligible())throw fail(400,eligibility.blockedMessage());
+        a=r.accounts().lockAccount(a.id).orElseThrow();entityManager.refresh(a);
+        Model.Job j=entityManager.find(Model.Job.class,d.jobId(),jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);if(j==null)throw fail(404,"Job not found");entityManager.refresh(j);if(!active(j))throw fail(400,"This opening is closed");if(!canSee(a,j))throw fail(403,"This opening is for another university");
+        Model.Profile p=r.profiles().lockByUserId(a.id).orElseThrow();entityManager.refresh(p);Map<String,Object> m=match(a,p,j);Eligibility.Report eligibility=(Eligibility.Report)m.get("eligibility");if(!eligibility.eligible())throw fail(400,eligibility.blockedMessage());
         if(r.applications().findByStudentIdAndJobId(a.id,j.id).isPresent())throw fail(409,"You have already applied for this opening");
         Model.Application x=new Model.Application();x.studentId=a.id;x.jobId=j.id;x.coverLetter=clean(d.coverLetter());x.matchScore=(double)m.get("score");
         x.resumeId=r.resumes().findByUserIdOrderByCreatedAtDesc(a.id).stream().findFirst().map(z->z.id).orElse(null);r.applications().save(x);event(x,a,"Application submitted");

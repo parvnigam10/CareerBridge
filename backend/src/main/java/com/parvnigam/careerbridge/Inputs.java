@@ -11,6 +11,15 @@ public final class Inputs {
         @NotNull @Min(0) Long academicRevision,@Size(max=1000) String note) {}
     public record ReviewAcademics(@NotNull @Min(0) Long version,@NotBlank @Pattern(regexp="VERIFIED|CHANGES_REQUESTED") String status,
         @Size(max=2000) String note,@AssertTrue boolean documentsChecked) {}
+    public record DriveRound(@NotBlank @Size(max=100) String name,@NotNull Instant scheduledAt,
+        @NotBlank @Size(max=200) String venue,@Size(max=2000) String instructions) {}
+    public record Drive(@Min(0) Long version,@NotBlank @Size(max=140) String title,@NotNull @Positive Long jobId,
+        Long universityId,@NotBlank @Size(max=200) String venue,@Size(max=4000) String instructions,
+        @NotNull Instant registrationOpensAt,@NotNull Instant registrationClosesAt,boolean requireVerifiedAcademics,
+        @NotNull @Size(min=1,max=8) List<@NotNull @jakarta.validation.Valid DriveRound> rounds) {}
+    public record DriveStatus(@NotNull @Min(0) Long version,@NotNull Model.DriveStatus status) {}
+    public record DriveResult(@NotNull @Min(0) Long version,@NotNull Model.Attendance attendance,
+        @NotNull Model.RoundOutcome outcome,@Size(max=2000) String note) {}
     public record Login(@Email @NotBlank @Size(max=254) String email,@NotBlank @Size(max=72) String password) {}
     public record Register(@NotBlank @Size(max=80) String name,@Email @NotBlank @Size(max=254) String email,
         @NotBlank @Size(min=10,max=72) String password,@NotNull Model.Role role,Long universityId,@Size(max=100) String department,@Min(1960) @Max(2100) Integer graduationYear) {}
