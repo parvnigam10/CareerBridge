@@ -6,7 +6,7 @@ Stop both servers with Ctrl+C. If your saved data changed since the last backup,
 
 ## University placement officers
 
-Sign in as admin and open **Accounts → Create placement officer**. Enter the name, email and temporary password, and choose the university. An officer manages that university's students, academic evidence and campus drives. A university can have multiple officers. The admin can manage all universities. To add a university first, use **Universities**.
+Sign in as admin and open **Placement Officers → Create Placement Officer**. Enter the name, email and temporary password, and choose the university. An officer manages that university's students, academic evidence and campus drives. A university can have multiple officers. The admin can manage all universities. The separate Placement Officers page lists existing officers and lets the admin enable or disable their access. The creation form fixes the role automatically and does not request a graduation year. To add a university first, use **Universities**.
 
 Officers sign in through the normal sign-in page. They can change their temporary password in **Settings**. Public registration still offers Student and Recruiter; it does not grant campus staff privileges. The account table now includes account IDs and a separate **Create other account** action. Original demo credentials remain `Demo@12345` unless changed.
 

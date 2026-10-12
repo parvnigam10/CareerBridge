@@ -8,6 +8,7 @@ on:
       - 'frontend/src/StudentPages.jsx'
       - 'frontend/src/RecruiterPages.jsx'
       - 'frontend/src/StaffPages.jsx'
+      - 'frontend/src/PlacementOfficersPage.jsx'
       - 'frontend/src/App.jsx'
       - 'frontend/src/style.css'
       - 'frontend/tests/campus-drives-smoke.cjs'
