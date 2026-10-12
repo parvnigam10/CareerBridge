@@ -91,7 +91,7 @@ public class CampusDriveService {
         if(j.universityId!=null&&!j.universityId.equals(d.universityId))throw Platform.fail(400,"Choose a public opening or one for this university");
         if(!p.active(j))throw Platform.fail(400,"Choose an active recruiter opening");
         if(!input.registrationOpensAt().isBefore(input.registrationClosesAt())||!input.registrationClosesAt().isAfter(Instant.now()))throw Platform.fail(400,"Registration must close in the future, after it opens");
-        if(j.deadline!=null&&input.registrationClosesAt().atZone(ZoneOffset.UTC).toLocalDate().isAfter(j.deadline))throw Platform.fail(400,"Drive registration must close by the opening's application deadline");
+        if(j.deadline!=null&&input.registrationClosesAt().atZone(ZoneId.systemDefault()).toLocalDate().isAfter(j.deadline))throw Platform.fail(400,"Drive registration must close by the opening's application deadline");
         Instant previous=input.registrationClosesAt();Set<String> names=new HashSet<>();
         for(var round:input.rounds()){
             if(!round.scheduledAt().isAfter(previous))throw Platform.fail(400,"Schedule rounds in order, after registration closes");
@@ -116,7 +116,7 @@ public class CampusDriveService {
         boolean complete=d.status==Model.DriveStatus.PUBLISHED&&input.status()==Model.DriveStatus.COMPLETED;
         if(!publish&&!cancel&&!complete)throw Platform.fail(400,"This drive status transition is not allowed");
         var j=lockedJob(d.jobId);
-        if(publish){if(!p.active(j)||j.universityId!=null&&!Objects.equals(j.universityId,d.universityId)||!d.registrationClosesAt.isAfter(Instant.now()))throw Platform.fail(409,"The opening or registration dates changed. Update the draft before publishing.");if(j.deadline!=null&&d.registrationClosesAt.atZone(ZoneOffset.UTC).toLocalDate().isAfter(j.deadline))throw Platform.fail(409,"Registration now exceeds the opening's deadline. Update the draft.");}
+        if(publish){if(!p.active(j)||j.universityId!=null&&!Objects.equals(j.universityId,d.universityId)||!d.registrationClosesAt.isAfter(Instant.now()))throw Platform.fail(409,"The opening or registration dates changed. Update the draft before publishing.");if(j.deadline!=null&&d.registrationClosesAt.atZone(ZoneId.systemDefault()).toLocalDate().isAfter(j.deadline))throw Platform.fail(409,"Registration now exceeds the opening's deadline. Update the draft.");}
         var participants=r.driveRegistrations().findByDriveIdOrderByIdAsc(id);
         if(complete){if(Instant.now().isBefore(rounds(id).get(rounds(id).size()-1).scheduledAt))throw Platform.fail(409,"The final round has not started yet");if(participants.stream().map(this::registrationView).anyMatch(x->Set.of("REGISTERED","IN_PROGRESS").contains(x.get("progress"))))throw Platform.fail(409,"Record round outcomes for all active participants before completing the drive");}
         d.status=input.status();r.drives().saveAndFlush(d);p.audit(a,"DRIVE_STATUS",id.toString(),d.status.name());

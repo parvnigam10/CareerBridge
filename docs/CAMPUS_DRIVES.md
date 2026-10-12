@@ -31,7 +31,7 @@ Each drive links one opening. Create separate drives when roles need different e
 1. Sign in as `placement@careerbridge.dev` (SRM), or an officer you created for your university. Open **Campus drives → Create campus drive**.
 2. Select an active recruiter opening available to that university. Enter a drive title, venue, student instructions and the registration opening/closing times.
 3. Add one to eight rounds. Give each a distinct name, time, venue and instructions. Registration must close in the future, after it opens, and by the opening's application deadline when set. Rounds must occur in order, after registration closes.
-4. Times entered in the browser use your device's local timezone and are stored as UTC instants. The displayed schedule uses the viewer's local timezone.
+4. Times entered in the browser use your device's local timezone and are stored as UTC instants. The displayed schedule uses the viewer's local timezone. The linked opening's date-only deadline uses the backend's local timezone, consistently with direct job application expiry.
 5. Optionally require **campus verification of current academic details**. This applies to drive registration only; it does not add a new requirement to direct job applications.
 6. Select **Save draft drive**. Drafts are visible to authorised campus staff and administrators. You can edit them before publishing.
 7. Inspect the saved schedule, then choose **Publish campus drive**. Students in that university and the opening's recruiter are notified. Students explicitly register; an officer does not automatically enrol everyone.
