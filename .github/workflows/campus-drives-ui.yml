@@ -1,0 +1,52 @@
+name: Campus drive browser checks
+on:
+  pull_request:
+    paths:
+      - 'frontend/src/CampusDrivePages.jsx'
+      - 'frontend/src/AcademicReviewPages.jsx'
+      - 'frontend/src/Academics.jsx'
+      - 'frontend/src/StudentPages.jsx'
+      - 'frontend/src/RecruiterPages.jsx'
+      - 'frontend/src/StaffPages.jsx'
+      - 'frontend/src/PlacementOfficersPage.jsx'
+      - 'frontend/src/App.jsx'
+      - 'frontend/src/style.css'
+      - 'frontend/tests/campus-drives-smoke.cjs'
+      - 'backend/src/main/java/com/parvnigam/careerbridge/CampusDrive*.java'
+      - 'backend/src/main/java/com/parvnigam/careerbridge/Platform.java'
+      - 'backend/src/main/java/com/parvnigam/careerbridge/Model.java'
+      - 'backend/src/main/java/com/parvnigam/careerbridge/Repositories.java'
+      - 'backend/src/main/java/com/parvnigam/careerbridge/Inputs.java'
+      - '.github/workflows/campus-drives-ui.yml'
+permissions:
+  contents: read
+jobs:
+  campus-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: sh mvnw -B package -DskipTests
+        working-directory: backend
+      - run: npm ci
+        working-directory: frontend
+      - run: npx playwright install --with-deps chromium
+        working-directory: frontend
+      - run: node tests/campus-drives-smoke.cjs
+        working-directory: frontend
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: campus-drive-checks
+          path: frontend/target/campus-drive-checks
+          retention-days: 7

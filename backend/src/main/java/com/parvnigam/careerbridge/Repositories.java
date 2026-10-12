@@ -42,6 +42,17 @@ public final class Repositories {
         List<Model.Application> findByJobIdOrderByCreatedAtDesc(Long id);
         Optional<Model.Application> findByStudentIdAndJobId(Long sid,Long jid);
     }
+    public interface CampusDrives extends JpaRepository<Model.CampusDrive,Long> {
+        List<Model.CampusDrive> findByUniversityIdOrderByIdDesc(Long id);
+        List<Model.CampusDrive> findByJobIdInOrderByIdDesc(Collection<Long> ids);
+        List<Model.CampusDrive> findAllByOrderByIdDesc();
+    }
+    public interface DriveRounds extends JpaRepository<Model.DriveRound,Long> { List<Model.DriveRound> findByDriveIdOrderByPositionAsc(Long id); }
+    public interface DriveRegistrations extends JpaRepository<Model.DriveRegistration,Long> {
+        List<Model.DriveRegistration> findByDriveIdOrderByIdAsc(Long id);
+        Optional<Model.DriveRegistration> findByDriveIdAndStudentId(Long driveId,Long studentId);
+    }
+    public interface DriveResults extends JpaRepository<Model.DriveResult,Long> { List<Model.DriveResult> findByRegistrationIdOrderByIdAsc(Long id); }
     public interface ApplicationEvents extends JpaRepository<Model.ApplicationEvent,Long> { List<Model.ApplicationEvent> findByApplicationIdOrderByCreatedAtAsc(Long id); }
     public interface SavedJobs extends JpaRepository<Model.SavedJob,Long> { List<Model.SavedJob> findByStudentId(Long id); Optional<Model.SavedJob> findByStudentIdAndJobId(Long sid,Long jid); }
     public interface Resumes extends JpaRepository<Model.Resume,Long> { List<Model.Resume> findByUserIdOrderByCreatedAtDesc(Long id); }

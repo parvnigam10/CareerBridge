@@ -140,3 +140,6 @@ The sign-in page offers email-based password recovery with a single-use 30-minut
 
 ### Academic document verification
 Students can submit supporting marksheets for campus review. Placement officers review their university's records, request corrections or approve the saved academic snapshot. Recruiters see review status; private files stay with the student and authorised staff. Academic edits require a new review. See [setup and testing](docs/ACADEMIC_REVIEW.md).
+
+### University staff and campus drives
+Admin has a dedicated placement-officer creation action, with university scope. Students upload academic evidence in separate qualification sections. Campus staff can schedule university drives around existing recruiter openings, publish registration windows and record attendance and ordered round outcomes. Drive registration reuses an existing job application; ordinary recruiter openings continue appearing directly to students. See [setup, permissions and testing](docs/CAMPUS_DRIVES.md).

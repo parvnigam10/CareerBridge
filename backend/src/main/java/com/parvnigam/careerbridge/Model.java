@@ -133,6 +133,39 @@ public final class Model {
         @Column(length=4000) public String coverLetter="";
         public double matchScore;
     }
+    public enum DriveStatus { DRAFT, PUBLISHED, COMPLETED, CANCELLED }
+    public enum Attendance { PENDING, PRESENT, ABSENT }
+    public enum RoundOutcome { PENDING, PASSED, NOT_SELECTED }
+    @Entity @Table(name="campus_drives")
+    public static class CampusDrive extends Base {
+        public Long universityId, jobId, creatorId;
+        public String title, venue;
+        @Column(length=4000) public String instructions;
+        public Instant registrationOpensAt, registrationClosesAt;
+        public boolean requireVerifiedAcademics;
+        @Enumerated(EnumType.STRING) public DriveStatus status=DriveStatus.DRAFT;
+    }
+    @Entity @Table(name="drive_rounds",uniqueConstraints=@UniqueConstraint(columnNames={"driveId","position"}))
+    public static class DriveRound extends Base {
+        public Long driveId;
+        public int position;
+        public String name, venue;
+        public Instant scheduledAt;
+        @Column(length=2000) public String instructions;
+    }
+    @Entity @Table(name="drive_registrations",uniqueConstraints=@UniqueConstraint(columnNames={"driveId","studentId"}))
+    public static class DriveRegistration extends Base {
+        public Long driveId, studentId, applicationId;
+        public String status="REGISTERED";
+    }
+    @Entity @Table(name="drive_results",uniqueConstraints=@UniqueConstraint(columnNames={"registrationId","roundId"}))
+    public static class DriveResult extends Base {
+        public Long registrationId, roundId, updatedBy;
+        @Enumerated(EnumType.STRING) public Attendance attendance=Attendance.PENDING;
+        @Enumerated(EnumType.STRING) public RoundOutcome outcome=RoundOutcome.PENDING;
+        @Column(length=2000) public String note="";
+        public Instant updatedAt;
+    }
     @Entity @Table(name="application_events")
     public static class ApplicationEvent extends Base {
         public Long applicationId; public Long actorId; public String status;
