@@ -14,11 +14,11 @@ For a cross-university test, create a placement officer for **Northfield Institu
 
 ## Dedicated academic upload areas
 
-Students open **Academic documents**. The page has separate sections for **10th marksheet**, **12th / diploma marksheet**, **College transcript** and **Additional supporting document**. Each upload receives its section's type automatically; there is no type dropdown. The first three categories are required for academic review, and additional documents are optional.
+Students open **Academic documents**. The page stacks four separate sections vertically for **10th marksheet**, **12th / diploma marksheet**, **College transcript** and **Additional supporting document**. Each upload receives its section's type automatically; there is no type dropdown. The first three categories are required for academic review, and additional documents are optional.
 
 Choose a file in each required section and upload it. New uploads are selected for review automatically; a replacement in a required category replaces that category's current selection. You can still select supporting copies manually. The submission button remains disabled until all three required categories are selected; at most eight files may be selected. Save complete academic details in My profile before submitting.
 
-Previously uploaded files stay under their original categories, with their history and retention rules. If an older upload was assigned the wrong category, remove it when unused and upload it through the correct section. Files already used in a review are retained. PDF, PNG and JPEG validation, privacy, corrections, approvals and renewed review after academic changes follow [academic review rules](ACADEMIC_REVIEW.md).
+Previously uploaded files stay under their original categories, with their history and retention rules. If an older upload was assigned the wrong category, delete it when removable and upload it through the correct section. Files used in a current pending or approved review are protected. Old evidence can be deleted from uploads after corrections or academic changes; its submitted copy remains in Review history. PDF, PNG and JPEG validation, privacy, corrections, approvals and renewed review after academic changes follow [academic review rules](ACADEMIC_REVIEW.md).
 
 ## What a campus drive adds
 
