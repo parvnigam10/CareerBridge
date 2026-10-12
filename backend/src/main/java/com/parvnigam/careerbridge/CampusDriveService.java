@@ -67,7 +67,8 @@ public class CampusDriveService {
     }
     private Map<String,Object> view(Model.Account a,Model.CampusDrive d,boolean details){
         var j=p.job(d.jobId);var university=r.universities().findById(d.universityId).orElseThrow();
-        var v=Platform.map("id",d.id,"version",d.version,"title",d.title,"venue",d.venue,"instructions",d.instructions,"universityId",d.universityId,"universityName",university.name,"status",d.status,"registrationWindow",window(d),"registrationOpensAt",d.registrationOpensAt,"registrationClosesAt",d.registrationClosesAt,"requireVerifiedAcademics",d.requireVerifiedAcademics,"job",p.jobView(j,a),"rounds",rounds(d.id));
+        var opening=p.canSee(a,j)?p.jobView(j,a):Platform.map("id",j.id,"title","Opening no longer available","companyName","Unavailable opening","status","UNAVAILABLE");
+        var v=Platform.map("id",d.id,"version",d.version,"title",d.title,"venue",d.venue,"instructions",d.instructions,"universityId",d.universityId,"universityName",university.name,"status",d.status,"registrationWindow",window(d),"registrationOpensAt",d.registrationOpensAt,"registrationClosesAt",d.registrationClosesAt,"requireVerifiedAcademics",d.requireVerifiedAcademics,"job",opening,"rounds",rounds(d.id));
         if(a.role==Model.Role.STUDENT){
             var mine=r.driveRegistrations().findByDriveIdAndStudentId(d.id,a.id);v.put("registration",mine.map(this::registrationView).orElse(null));v.put("registrationBlockedReason",blocked(a,d,j));
             v.put("canRegister",blocked(a,d,j).isEmpty()&&(mine.isEmpty()||mine.get().status.equals("WITHDRAWN")));
