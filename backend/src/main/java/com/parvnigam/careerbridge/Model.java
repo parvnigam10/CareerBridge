@@ -74,6 +74,7 @@ public final class Model {
         @Enumerated(EnumType.STRING) public AcademicDocumentKind kind;
         public String filename, storageKey, mediaType;
         public long sizeBytes;
+        public Instant removedAt;
     }
     @Entity(name="AcademicSubmission") @Table(name="academic_submissions")
     public static class AcademicSubmission extends Base {
