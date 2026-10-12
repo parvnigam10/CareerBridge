@@ -50,7 +50,7 @@ Changes to eligibility after registration do not silently delete registrations o
 
 ### Test attendance, rounds and completion
 
-1. After a scheduled round begins, the placement officer opens the drive and chooses **Manage rounds for [student]**.
+1. After a scheduled round begins, the placement officer opens the drive (or selects **Refresh drive** if already viewing it) and chooses **Manage rounds for [student]**.
 2. Record attendance as Pending, Present or Absent, and the campus outcome as Pending, Passed or Not selected. A Passed outcome requires Present attendance; a Not selected outcome requires feedback.
 3. The student must pass earlier rounds before later rounds can be recorded. Once later rounds have recorded attendance, an earlier pass cannot be changed into a failure or pending result.
 4. Students see their own results and feedback in the drive and receive notifications. The opening's recruiter sees registered campus participants and read-only round results. Another recruiter cannot see or export the roster. Students cannot see other students' registrations or download the roster.
