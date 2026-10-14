@@ -36,6 +36,7 @@ public class CareerBridgeApplication {
 			Model.ApplicationEvent.class.getName(),
 			Model.SavedJob.class.getName(),
 			Model.Resume.class.getName(),
+			Model.ResumeReport.class.getName(),
 			Model.Notice.class.getName(),
 			Model.Interview.class.getName(),
 			Model.MockSession.class.getName(),

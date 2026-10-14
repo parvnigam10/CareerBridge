@@ -10,7 +10,8 @@
     "test:e2e": "node tests/browser-smoke.cjs",
     "test:eligibility": "node tests/eligibility-smoke.cjs",
     "test:academics": "node tests/academic-review-smoke.cjs",
-    "test:drives": "node tests/campus-drives-smoke.cjs"
+    "test:drives": "node tests/campus-drives-smoke.cjs",
+    "test:resumes": "node tests/resume-review-smoke.cjs"
   },
   "dependencies": {
     "lucide-react": "1.52.0",

@@ -56,6 +56,9 @@ public final class Repositories {
     public interface ApplicationEvents extends JpaRepository<Model.ApplicationEvent,Long> { List<Model.ApplicationEvent> findByApplicationIdOrderByCreatedAtAsc(Long id); }
     public interface SavedJobs extends JpaRepository<Model.SavedJob,Long> { List<Model.SavedJob> findByStudentId(Long id); Optional<Model.SavedJob> findByStudentIdAndJobId(Long sid,Long jid); }
     public interface Resumes extends JpaRepository<Model.Resume,Long> { List<Model.Resume> findByUserIdOrderByCreatedAtDesc(Long id); }
+    public interface ResumeReports extends JpaRepository<Model.ResumeReport,Long> {
+        List<Model.ResumeReport> findByUserIdOrderByCreatedAtDescIdDesc(Long id,org.springframework.data.domain.Pageable page);
+    }
     public interface Notices extends JpaRepository<Model.Notice,Long> { List<Model.Notice> findByUserIdOrderByCreatedAtDesc(Long id); }
     public interface Interviews extends JpaRepository<Model.Interview,Long> { List<Model.Interview> findByStudentIdOrderByScheduledAtAsc(Long id); List<Model.Interview> findByRecruiterIdOrderByScheduledAtAsc(Long id); }
     public interface Mocks extends JpaRepository<Model.MockSession,Long> { List<Model.MockSession> findByUserIdOrderByCreatedAtDesc(Long id); }
