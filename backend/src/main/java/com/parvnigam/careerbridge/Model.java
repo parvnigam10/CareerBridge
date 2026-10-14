@@ -181,6 +181,13 @@ public final class Model {
         @Column(length=60000) public String extractedText;
         @ElementCollection(fetch=FetchType.EAGER) public List<String> detectedSkills=new ArrayList<>();
     }
+    @Entity @Table(name="resume_reports", indexes=@Index(name="resume_report_owner", columnList="userId,createdAt"))
+    public static class ResumeReport extends Base {
+        @Column(nullable=false) public Long userId;
+        public Long resumeId;
+        public String filename;
+        @Column(length=60000,nullable=false) public String reportJson;
+    }
     @Entity @Table(name="notifications")
     public static class Notice extends Base {
         public Long userId; public String title;

@@ -143,3 +143,6 @@ Students can submit supporting marksheets for campus review. Placement officers 
 
 ### University staff and campus drives
 Admin has a dedicated placement-officer creation action, with university scope. Students upload academic evidence in separate qualification sections. Campus staff can schedule university drives around existing recruiter openings, publish registration windows and record attendance and ordered round outcomes. Drive registration reuses an existing job application; ordinary recruiter openings continue appearing directly to students. See [setup, permissions and testing](docs/CAMPUS_DRIVES.md).
+
+### Resume readiness and job skill review
+Resume Studio includes explained estimated ATS readiness, optional job-target skill matching, extracted-text preview, saved reports and comparison across versions. Optional AI writing advice requires explicit opt-in and provider configuration; it never changes the local scores. These are content estimates, not employer ATS results or hiring predictions. See [scoring, privacy and testing](docs/RESUME_REVIEW.md).
