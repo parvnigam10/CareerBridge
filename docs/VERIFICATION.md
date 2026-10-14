@@ -66,9 +66,9 @@ Remove-Item Env:UPLOAD_DIR
 
 ## External services not verified
 
-Docker runtime, a live PostgreSQL/Redis server, authenticated SMTP delivery, real provider-generated questions and public GitHub sync were not exercised in this environment. They require their respective runtime/network/credentials. Configuration and adapters are included; these checks do not establish production readiness or external delivery guarantees.
+Docker runtime, a live PostgreSQL/Redis server, authenticated SMTP delivery and public GitHub sync were not exercised in this environment. They require their respective runtime/network/credentials. Configuration and adapters are included; these checks do not establish production readiness or external delivery guarantees.
 
-Python tests check the generated-question response parser and provider-failure fallback with mocked requests. No paid-provider request was made. Match scoring and practice feedback are deterministic aids, not independently validated models.
+Python tests check local ranking and built-in interview questions. Paid model generation has been removed; obsolete provider credentials cannot enable it. Match scoring and practice feedback are deterministic aids, not independently validated models.
 
 ## Structured academic profile update — 10 October 2026
 

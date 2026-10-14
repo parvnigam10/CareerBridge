@@ -18,11 +18,17 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(self.client.post("/rank", json={"jobs": []}).status_code, 422)
         self.assertEqual(self.client.post("/questions", json={"role": "", "skill": "Java"}).status_code, 422)
 
-    @patch.dict(os.environ, {"OPENAI_API_KEY": "", "OPENAI_MODEL": ""})
-    def test_question_contract(self):
+    @patch.dict(os.environ, {"OPENAI_API_KEY": "fake-test-key", "OPENAI_MODEL": "test-model"})
+    @patch("urllib.request.urlopen", side_effect=AssertionError("External network must not be used"))
+    def test_question_contract(self, request):
         response = self.client.post("/questions", json={"role": "Java developer", "skill": "Java"})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()["questions"]), 5)
+        self.assertEqual(response.json()["engine"], "PYTHON_QUESTION_BANK")
+        request.assert_not_called()
+
+    def test_paid_resume_feedback_route_is_removed(self):
+        self.assertEqual(self.client.post("/resume-feedback", json={}).status_code, 404)
 
 if __name__ == "__main__":
     unittest.main()

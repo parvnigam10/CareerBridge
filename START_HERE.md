@@ -85,7 +85,7 @@ For a simple end-to-end demo:
 
 ## Optional services
 
-The app already has explainable matching, learning suggestions and text interview practice without an external AI provider. Python adds TF-IDF text ranking. Generated questions require your own configured API credentials. Email needs SMTP credentials. See `README.md` and `docs/INTEGRATIONS.md` when you want to enable them.
+The app already has explainable matching, learning suggestions and text interview practice without an external AI provider. Python adds TF-IDF text ranking. Interview questions come from local question banks; there is no paid AI integration or API key requirement. Email needs SMTP credentials. See `README.md` and `docs/INTEGRATIONS.md` when you want to enable them.
 
 Stop each development server with Ctrl+C. Data persists between restarts.
 

@@ -2,7 +2,7 @@ import os
 import unittest
 from unittest.mock import patch
 from matching import rank
-from questions import generate, extract_questions, bank
+from questions import generate, bank
 
 class MatchingTests(unittest.TestCase):
     def test_relevant_role_ranks_above_unrelated_role(self):
@@ -22,15 +22,12 @@ class MatchingTests(unittest.TestCase):
         self.assertEqual(len(response["questions"]), 5)
         self.assertEqual(response["engine"], "PYTHON_QUESTION_BANK")
 
-    def test_response_parser_ignores_reasoning_items(self):
-        import json
-        response = {"output": [{"type": "reasoning"}, {"content": [{"type": "output_text", "text": json.dumps({"questions": bank("Developer", "SQL")})}]}]}
-        self.assertEqual(len(extract_questions(response)), 5)
-
     @patch.dict(os.environ, {"OPENAI_API_KEY": "fake-test-key", "OPENAI_MODEL": "test-model"})
-    @patch("urllib.request.urlopen", side_effect=TimeoutError)
-    def test_provider_failure_returns_honest_fallback(self, request):
-        self.assertEqual(generate("Developer", "Java")["engine"], "PYTHON_QUESTION_BANK_FALLBACK")
+    @patch("urllib.request.urlopen", side_effect=AssertionError("External network must not be used"))
+    def test_old_provider_credentials_cannot_enable_paid_calls(self, request):
+        response = generate("Developer", "Java")
+        self.assertEqual(response, {"questions": bank("Developer", "Java"), "engine": "PYTHON_QUESTION_BANK"})
+        request.assert_not_called()
 
 if __name__ == "__main__":
     unittest.main()

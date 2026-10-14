@@ -7,7 +7,7 @@ function Score({title,value,detail}) {
   return <div className="resume-score"><span>{title}</span><strong>{value==null?'—':value}<small>{value==null?'Not scored':'/100'}</small></strong><p>{detail}</p></div>;
 }
 function Report({item}) {
-  const {readiness,match,target,ai,limitations}=item.report;
+  const {readiness,match,target,limitations}=item.report;
   return <div className="resume-report">
     <p className="muted">{item.filename} · {datetime(item.createdAt)} · {target.title}</p>
     <div className="resume-score-grid"><Score title="Estimated ATS readiness" value={readiness.score} detail="Contact, sections and content evidence"/><Score title="Job skill match" value={match.score} detail={target.type==='GENERAL'?'Choose a job target to check skill coverage.':target.title}/></div>
@@ -16,8 +16,8 @@ function Report({item}) {
     <div className="resume-checks">{readiness.checks.map(check=><section key={check.key}><div><h4>{check.title}</h4><strong>{check.earned}/{check.possible}</strong></div><p>{check.detail}</p>{check.earned<check.possible&&<p className="resume-suggestion">{check.suggestion}</p>}</section>)}</div>
     <h3>Target skill coverage</h3><p className="muted">{match.explanation}</p>
     {match.requiredSkills.length>0&&<div className="resume-skill-grid"><section><h4>Matched skills</h4><div className="tags">{match.matchedSkills.map(s=><span key={s}>{s}</span>)}</div>{!match.matchedSkills.length&&<p>No target skills detected in this version.</p>}</section><section><h4>Missing mentions</h4><div className="tags missing">{match.missingSkills.map(s=><span key={s}>{s}</span>)}</div><p className="muted small">{match.missingSkills.length?'Add a skill only if you can support it with real experience. Otherwise, use it as a learning goal.':'All identified target skills are mentioned. This does not verify proficiency.'}</p></section></div>}
-    <h3>AI writing suggestions</h3>
-    {ai.status==='OPENAI'?<><p className="muted small">AI advice does not affect the scores. Review wording and preserve your actual achievements.</p>{ai.suggestions.map((s,i)=><section className="resume-ai-item" key={i}><h4>{s.issue}</h4><p>{s.recommendation}</p></section>)}</>:<p className="muted">{ai.status==='NOT_REQUESTED'?'Not requested for this report. The local suggestions above are available without AI.':'AI suggestions were unavailable. Your local scores and suggestions were saved successfully.'}</p>}
+    <h3>Suggested next steps</h3>
+    {readiness.suggestions.length?<ul className="resume-next-steps">{readiness.suggestions.map(text=><li key={text}>{text}</li>)}</ul>:<p className="muted">This version covers the current content checks. Review target skills and keep all claims accurate.</p>}
     <details className="resume-method"><summary>What this report can and cannot check</summary><ul>{limitations.map(text=><li key={text}>{text}</li>)}</ul><p>Scoring method: {item.report.scorerVersion}. Section detection uses separate heading lines. Job match counts unique skill mentions equally; repeating a keyword adds no credit.</p></details>
   </div>;
 }
@@ -55,7 +55,7 @@ export function ResumesPage() {
   async function analyse(e) {
     e.preventDefault();setGenerating(true);const data=new FormData(e.currentTarget);
     const chosen=resumeId||String(state.data?.[0]?.id||'');
-    const body={aiSuggestions:data.get('aiSuggestions')==='on'};
+    const body={};
     if(mode==='OPENING')body.jobId=Number(data.get('jobId'));
     if(mode==='PASTED'){body.targetTitle=data.get('targetTitle');body.jobDescription=data.get('jobDescription');}
     try {const result=await api(`/student/resumes/${chosen}/reports`,{method:'POST',body});setSelected(result);setPage(0);history.reload();toast('Resume report saved');}
@@ -83,9 +83,9 @@ export function ResumesPage() {
           <Field label="Review target"><select aria-label="Review target" value={mode} onChange={e=>setMode(e.target.value)} disabled={generating}><option value="GENERAL">General resume readiness</option><option value="OPENING">Choose an opening</option><option value="PASTED">Paste a job description</option></select></Field>
           {mode==='OPENING'&&<Field label="Target opening" wide>{jobs.error?<p role="alert">{jobs.error} <button type="button" className="text-button" onClick={jobs.reload}>Try again</button></p>:<select aria-label="Target opening" name="jobId" required disabled={generating||jobs.loading}><option value="">{jobs.loading?'Loading openings…':activeJobs.length?'Select an opening':'No active openings — paste a description instead'}</option>{activeJobs.map(j=><option key={j.id} value={j.id}>{j.title} · {j.companyName}</option>)}</select>}</Field>}
           {mode==='PASTED'&&<><Field label="Target role (optional)" name="targetTitle" maxLength={150} disabled={generating} wide/><Field label="Job description" wide><textarea name="jobDescription" required minLength={30} maxLength={12000} rows={6} disabled={generating} placeholder="Paste the role description and required skills. Matching identifies skills from a limited dictionary."/></Field></>}
-        </div><label className="check-field resume-ai-choice"><input name="aiSuggestions" type="checkbox" disabled={generating}/><span>Include optional AI writing suggestions. I agree to send project/experience text and target details to the configured OpenAI service. Common email, phone and URL patterns are masked, but other personal details may remain. This requires provider configuration and may incur API charges.</span></label>
+        </div>
         <div className="row-actions"><Button type="submit" busy={generating} disabled={busy||(mode==='OPENING'&&(jobs.loading||!!jobs.error||!activeJobs.length))}>Analyse resume <ArrowUpRight size={16}/></Button><Button type="button" variant="secondary" busy={busy} disabled={generating} onClick={showText}><Eye size={16}/>Preview extracted text</Button></div>
-        <p className="muted small">Local scoring works without AI. Scores estimate content readiness, not employer decisions. Layout checks and OCR are not included.</p></form>
+        <p className="muted small">Scores and suggestions use local checks. No external AI service or API key is needed. Layout checks and OCR are not included.</p></form>
       </section>
       <div className="section-heading"><h2>Your resume versions</h2></div><div className="resume-list">{items.map((v,index)=><section className="panel" key={v.id}><div className="panel-head"><div><Badge tone={index===0?'green':''}>{index===0?'Latest version':'Previous version'}</Badge><h3>{v.filename}</h3><p className="muted small">{datetime(v.createdAt)} · {Math.round(v.sizeBytes/1024)} KB</p></div><div className="row-actions"><Button variant="secondary small" onClick={()=>download(`/resumes/${v.id}/download`,v.filename).catch(e=>toast(e.message,'error'))}><Download size={15}/>Download</Button><Button variant="ghost small" aria-label={`Delete ${v.filename}`} onClick={()=>setRemoving({...v,kind:'resume'})}><Trash2 size={15}/></Button></div></div><div className="tags">{v.detectedSkills.map(s=><span key={s}>{s}</span>)}</div>{v.detectedSkills.length>0&&<Button variant="secondary small" disabled={!profile.data} onClick={()=>addSkills(v.detectedSkills)}>Add detected skills to profile</Button>}</section>)}</div>
     </>:<Empty title="Give your profile a resume.">Upload a version to review its readiness and make it available with future applications.</Empty>}</LoadState>

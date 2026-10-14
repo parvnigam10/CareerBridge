@@ -27,13 +27,11 @@ class ResumeReportTests {
     @Autowired Repositories.ResumeReports reports;
     static HttpServer provider;
     static final AtomicInteger requests=new AtomicInteger();
-    static String response="{\"status\":\"OPENAI\",\"suggestions\":[{\"issue\":\"Project detail\",\"recommendation\":\"Explain the test strategy using your actual work.\"}]}";
-    static String received="";
     @DynamicPropertySource static void service(DynamicPropertyRegistry registry) throws Exception {
         provider=HttpServer.create(new InetSocketAddress("127.0.0.1",0),0);
-        provider.createContext("/resume-feedback",exchange->{
-            requests.incrementAndGet();received=new String(exchange.getRequestBody().readAllBytes(),StandardCharsets.UTF_8);
-            byte[] body=response.getBytes(StandardCharsets.UTF_8);exchange.getResponseHeaders().set("Content-Type","application/json");
+        provider.createContext("/",exchange->{
+            requests.incrementAndGet();exchange.getRequestBody().readAllBytes();
+            byte[] body="{}".getBytes(StandardCharsets.UTF_8);exchange.getResponseHeaders().set("Content-Type","application/json");
             exchange.sendResponseHeaders(200,body.length);try(var out=exchange.getResponseBody()){out.write(body);}
         });provider.start();registry.add("app.ai-url",()->"http://127.0.0.1:"+provider.getAddress().getPort());
     }
@@ -95,17 +93,12 @@ class ResumeReportTests {
         assertEquals(400,call("POST","/student/resumes/"+resume.id+"/reports",owner,Map.of("jobId",campus.id)).statusCode());
         assertEquals(400,call("GET","/student/resume-reports?page=-1",owner,null).statusCode());
     }
-    @Test void optionalAiRequiresOptInMasksContactsAndNeverChangesScores() throws Exception {
-        response="{\"status\":\"OPENAI\",\"suggestions\":[{\"issue\":\"Project detail\",\"recommendation\":\"Explain your actual tests.\"}]}";
-        var resume=fixture("student@careerbridge.dev",ResumeScorerTests.STRONG+"\nProjects\nContact student@example.com +91 9876543210 https://example.com/private");String owner=login("student@careerbridge.dev");
-        int count=requests.get();var local=tree(call("POST","/student/resumes/"+resume.id+"/reports",owner,Map.of())).get("report");assertEquals(count,requests.get());
-        var ai=tree(call("POST","/student/resumes/"+resume.id+"/reports",owner,Map.of("aiSuggestions",true))).get("report");
-        assertEquals(count+1,requests.get());assertEquals("OPENAI",ai.get("ai").get("status").asText());assertEquals(local.get("readiness"),ai.get("readiness"));
-        assertFalse(received.contains("student@example.com"));assertFalse(received.contains("9876543210"));assertFalse(received.contains("https://example.com/private"));
-        assertFalse(received.contains("Example Student"));assertFalse(ai.toString().contains("extractedText"));
-        response="{\"status\":\"OPENAI\",\"score\":100,\"suggestions\":[{\"issue\":\"Bad\"}]}";
-        var malformed=tree(call("POST","/student/resumes/"+resume.id+"/reports",owner,Map.of("aiSuggestions",true))).get("report");
-        assertEquals("UNAVAILABLE",malformed.get("ai").get("status").asText());assertEquals(local.get("readiness"),malformed.get("readiness"));
+    @Test void legacyAiFlagCannotTriggerAnyServiceCall() throws Exception {
+        var resume=fixture("student@careerbridge.dev",ResumeScorerTests.STRONG);String owner=login("student@careerbridge.dev");int count=requests.get();
+        var local=call("POST","/student/resumes/"+resume.id+"/reports",owner,Map.of());assertEquals(201,local.statusCode(),local.body());
+        var stale=call("POST","/student/resumes/"+resume.id+"/reports",owner,Map.of("aiSuggestions",true));assertEquals(201,stale.statusCode(),stale.body());
+        assertEquals(count,requests.get());var report=tree(stale).get("report");assertFalse(report.has("ai"));
+        assertEquals(tree(local).get("report"),report);assertFalse(report.get("readiness").get("suggestions").isNull());
     }
     @Test void paginationIsStableAndLimitedToTheOwner() throws Exception {
         var owner=accounts.findByEmail("outside@careerbridge.dev").orElseThrow();List<Long> ids=new ArrayList<>();

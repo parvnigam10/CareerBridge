@@ -116,7 +116,7 @@ The base match uses **70% required skills, 15% academic fit, 10% experience and 
 
 When Python is configured, recommendation ordering uses 75% base match and 25% TF-IDF cosine text similarity. This is lexical ranking, not a trained prediction model or semantic embeddings. The displayed base compatibility score remains explainable.
 
-Interview feedback uses keyword coverage and answer length. It is a practice aid, not a validated interview assessment. With no provider credentials, questions come from a built-in bank. Optional provider calls generate questions only; scoring remains local. Engine labels expose the chosen mode and fallback.
+Interview feedback uses keyword coverage and answer length. It is a practice aid, not a validated interview assessment. Questions come from built-in banks and scoring remains local. No paid AI provider or API key is used. Engine labels show the local bank in use.
 
 ## Current boundaries and next extensions
 
@@ -145,4 +145,4 @@ Students can submit supporting marksheets for campus review. Placement officers 
 Admin has a dedicated placement-officer creation action, with university scope. Students upload academic evidence in separate qualification sections. Campus staff can schedule university drives around existing recruiter openings, publish registration windows and record attendance and ordered round outcomes. Drive registration reuses an existing job application; ordinary recruiter openings continue appearing directly to students. See [setup, permissions and testing](docs/CAMPUS_DRIVES.md).
 
 ### Resume readiness and job skill review
-Resume Studio includes explained estimated ATS readiness, optional job-target skill matching, extracted-text preview, saved reports and comparison across versions. Optional AI writing advice requires explicit opt-in and provider configuration; it never changes the local scores. These are content estimates, not employer ATS results or hiring predictions. See [scoring, privacy and testing](docs/RESUME_REVIEW.md).
+Resume Studio includes explained estimated ATS readiness, optional job-target skill matching, extracted-text preview, saved reports and comparison across versions. Scores and improvement suggestions use local checks; no paid AI API or provider key is required. These are content estimates, not employer ATS results or hiring predictions. See [scoring, privacy and testing](docs/RESUME_REVIEW.md).
