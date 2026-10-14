@@ -18,12 +18,12 @@ public class ResumeReports {
     final Platform platform;
     final Repositories.Resumes resumes;
     final Repositories.ResumeReports reports;
-    final CareerService career;
     final JsonMapper json = JsonMapper.builder().build();
-    public ResumeReports(Platform platform, Repositories.Resumes resumes, Repositories.ResumeReports reports, CareerService career) {
-        this.platform=platform; this.resumes=resumes; this.reports=reports; this.career=career;
+    public ResumeReports(Platform platform, Repositories.Resumes resumes, Repositories.ResumeReports reports) {
+        this.platform=platform; this.resumes=resumes; this.reports=reports;
     }
-    public record Request(Long jobId, @Size(max=150) String targetTitle, @Size(max=12000) String jobDescription, Boolean aiSuggestions) {}
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties("aiSuggestions")
+    public record Request(Long jobId, @Size(max=150) String targetTitle, @Size(max=12000) String jobDescription) {}
     Model.Resume ownedResume(Model.Account actor, Long id) {
         Model.Resume resume=resumes.findById(id).orElseThrow(() -> Platform.fail(404,"Resume not found"));
         if(!actor.id.equals(resume.userId)) throw Platform.fail(403,"Only your own resume can be analysed");
@@ -70,41 +70,14 @@ public class ResumeReports {
             json.writeValueAsString(List.of(type,request.jobId()==null?"":request.jobId(),title,description,match.requiredSkills()))
                 .getBytes(StandardCharsets.UTF_8)));
         Map<String,Object> target=Platform.map("type",type,"jobId",request.jobId(),"title",title,"fingerprint",fingerprint);
-        Map<String,Object> ai=Platform.map("status","NOT_REQUESTED","suggestions",List.of());
-        if(Boolean.TRUE.equals(request.aiSuggestions())) {
-            // Only project/experience sections are shared. Mask common contacts/URLs; this is not full anonymisation.
-            String evidence=ResumeScorer.evidenceText(text);
-            if(evidence.length()>8000) evidence=evidence.substring(0,8000);
-            evidence=evidence.replaceAll("[\\w.%+-]+@[\\w.-]+\\.[A-Za-z]{2,}","[email removed]")
-                .replaceAll("(?:https?://|www\\.)\\S+","[link removed]")
-                .replaceAll("(?<!\\d)(?:\\+\\d{1,3}[ -]?)?(?:\\(?\\d{3}\\)?[ .-]?\\d{3}[ .-]?\\d{4}|\\d{5}[ -]?\\d{5})(?!\\d)","[phone removed]");
-            Map<String,Object> remote=career.remote("/resume-feedback",Platform.map("evidenceText",evidence,"targetTitle",title,
-                "jobDescription",description,"missingSkills",match.missingSkills(),"localSuggestions",readiness.suggestions()));
-            ai=validatedAi(remote);
-        }
         Map<String,Object> snapshot=Platform.map("scorerVersion",ResumeScorer.VERSION,"target",target,
-            "readiness",readiness,"match",match,"ai",ai,
+            "readiness",readiness,"match",match,
             "limitations",List.of("Estimated content readiness, not an employer ATS score or a shortlisting prediction.",
                 "Text checks cannot validate columns, tables, page layout, factual accuracy or skill proficiency.",
                 "Pasted descriptions use a limited skill dictionary. Review the identified skills before relying on the match score."));
         Model.ResumeReport report=new Model.ResumeReport(); report.userId=actor.id; report.resumeId=id;
         report.filename=resume.filename; report.reportJson=json.writeValueAsString(snapshot);
         return view(reports.save(report));
-    }
-    Map<String,Object> validatedAi(Map<String,Object> remote) {
-        if(remote!=null&&"OPENAI".equals(remote.get("status"))&&remote.get("suggestions") instanceof List<?> items
-            && !items.isEmpty()&&items.size()<=5) {
-            List<Map<String,Object>> safe=new ArrayList<>();
-            for(Object item:items) {
-                if(!(item instanceof Map<?,?> value)||!(value.get("issue") instanceof String issue)
-                    ||!(value.get("recommendation") instanceof String recommendation)||issue.isBlank()||recommendation.isBlank()
-                    ||issue.length()>1000||recommendation.length()>1500)
-                    return Platform.map("status","UNAVAILABLE","suggestions",List.of());
-                safe.add(Platform.map("issue",issue,"recommendation",recommendation));
-            }
-            return Platform.map("status","OPENAI","suggestions",safe);
-        }
-        return Platform.map("status","UNAVAILABLE","suggestions",List.of());
     }
     @GetMapping("/resume-reports")
     Object list(@AuthenticationPrincipal Jwt jwt,@RequestParam(defaultValue="0") int page) {

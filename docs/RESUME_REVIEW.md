@@ -20,17 +20,15 @@ Job match = `100 × matched unique skills / identified unique target skills`, ro
 
 ## Versions and privacy
 
-`resume_reports` stores the filename, source resume ID, report timestamp, scorer version, check results, target title, target fingerprint, skill lists and optional suggestions. It does not store the extracted resume text or job description. Reports are snapshots: editing an opening, changing a profile or deleting an unused resume version cannot rewrite a prior score. Deleting an attached resume still obeys the existing application-retention rule. Students may delete a report independently. Reports are listed in pages of 20; the UI supports browsing pages and selecting two reports across pages. Comparisons warn when targets or scoring methods differ.
+`resume_reports` stores the filename, source resume ID, report timestamp, scorer version, check results, target title, target fingerprint, skill lists and local suggestions. It does not store the extracted resume text or job description. Reports are snapshots: editing an opening, changing a profile or deleting an unused resume version cannot rewrite a prior score. Deleting an attached resume still obeys the existing application-retention rule. Students may delete a report independently. Reports are listed in pages of 20; the UI supports browsing pages and selecting two reports across pages. Comparisons warn when targets or scoring methods differ.
 
 The owner-only extracted-text preview helps identify missing/reordered content. The current parser does not perform OCR or assess page layout, columns, tables, grammar, factual accuracy or skill proficiency. No layout compatibility claim is made from plain extracted text.
 
-## Optional AI suggestions
+## Local suggestions only
 
-The checkbox is off by default. Students explicitly choose to share Projects/Experience section text (at most 8,000 characters), target title/description, missing skills and local suggestions. Common email, phone and URL patterns in project text are masked. This is **not full anonymisation**; other personal information may remain. Readiness and job-match scores stay local and are never taken from provider output.
+Resume readiness, target skill matching and improvement suggestions run inside the Java backend. No resume content is sent to an external AI service. The paid AI checkbox, suggestion endpoint and provider configuration have been removed. Old clients sending `aiSuggestions:true` cannot enable a provider call; the retired field is ignored. Previously saved reports remain readable, with the UI showing their local checks and suggestions.
 
-The existing Python service must be running; the Spring process needs `AI_SERVICE_URL` and Python needs `OPENAI_API_KEY` and `OPENAI_MODEL` for a model supporting Structured Outputs. Compose already wires these environment variables. Native `start-dev.ps1` starts Java and React only; it does not start Python or auto-load `.env`. Do not commit keys. Provider calls may incur API charges.
-
-Python uses the Responses API with `store: false`, a strict suggestion-only JSON schema and a 25-second timeout. Java's existing internal-service timeout is 35 seconds. Refusals, incomplete/invalid outputs, missing credentials and outages yield an explicit unavailable label while retaining the local report. Advice must preserve actual achievements and cannot create skills, credentials or metrics. Only suggestions are accepted; scores from a provider are ignored. There are no provider calls during automated tests.
+Interview questions also use built-in banks only. Python remains optional for local text ranking and local questions. No paid AI API or API key is used anywhere in these flows. This does not remove ordinary hosting/resource costs if the project is deployed.
 
 ## API and checks
 
@@ -39,9 +37,9 @@ All routes below require an enabled, verified student session and enforce owners
 | Method | Route | Purpose |
 |---|---|---|
 | GET | `/api/student/resumes/{id}/text` | Owner-only extracted text |
-| POST | `/api/student/resumes/{id}/reports` | Create snapshot; body `{jobId?, targetTitle?, jobDescription?, aiSuggestions:false}` |
+| POST | `/api/student/resumes/{id}/reports` | Create snapshot; body `{jobId?, targetTitle?, jobDescription?}` |
 | GET | `/api/student/resume-reports?page=0` | Latest reports, 20 per page |
 | GET | `/api/student/resume-reports/{id}` | Read one saved report |
 | DELETE | `/api/student/resume-reports/{id}` | Delete owned report; returns 204 |
 
-Run `sh mvnw verify` in backend, `npm run build` and `npm run test:resumes` in frontend (install Chromium with `npx playwright install chromium`), and `python -m unittest discover -v` in ai-service. The browser check starts disposable Java/Vite servers on 8090/5180, uses an in-memory H2 database and fictional uploads, and stops the servers afterwards. Backend tests cover rule calculations, alias/boundary matching, ownership/role/campus enforcement, immutable snapshots, deletion, opt-in provider requests, masking and malformed response fallback. Python tests mock provider requests, including success/failure/refusal cases.
+Run `sh mvnw verify` in backend, `npm run build` and `npm run test:resumes` in frontend (install Chromium with `npx playwright install chromium`), and `python -m unittest discover -v` in ai-service. The browser check starts disposable Java/Vite servers on 8090/5180, uses an in-memory H2 database and fictional uploads, and stops the servers afterwards. Backend tests cover rule calculations, alias/boundary matching, ownership/role/campus enforcement, immutable snapshots, deletion and retired AI flags that cannot trigger service calls. Python tests ensure local questions still work even with obsolete provider credentials in the environment, and verify that the retired paid-suggestion route returns 404.

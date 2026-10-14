@@ -20,19 +20,9 @@ $env:AI_SERVICE_URL="http://127.0.0.1:8000"
 
 The service needs no model download or credentials for TF-IDF ranking and its question bank. If unavailable, the Spring application falls back to its own matching and question bank. Keep the Python service private: it relies on Spring for user authentication and is not an independently public API.
 
-## Generated interview questions
+## Local interview questions and resume suggestions
 
-Before starting Python, set your own provider key and an available model that supports Structured Outputs:
-
-```powershell
-$env:OPENAI_API_KEY="your-key"
-$env:OPENAI_MODEL="your-selected-model"
-.\.venv\Scripts\python.exe -m uvicorn main:app --host 127.0.0.1 --port 8000
-```
-
-Only the requested target role and skill are sent to the OpenAI Responses API. Resumes and mock answers are not sent to that provider. Requests set `store=false`. Provider terms and billing still apply. Do not commit keys or put them in frontend code. Provider failures use the labeled question-bank fallback.
-
-No real paid-provider call was made during verification. Request construction, response parsing and fallback were checked without credentials. Official API reference: https://developers.openai.com/api/reference/resources/responses/methods/create
+Interview questions come from the Java or Python built-in question bank. Resume readiness, job skill coverage and improvement suggestions use Java rules. There are no external AI generation calls, provider API keys or per-request AI charges. The optional Python service only supplies local TF-IDF ranking and a local question bank; it does not contact a model provider.
 
 ## SMTP email
 
